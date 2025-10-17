@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  database:
+    image: postgres:15-alpine
+    container_name: heritage_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-heritage_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-heritage_password}
+      POSTGRES_DB: ${DB_NAME:-heritage_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - heritage_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-heritage_user} -d ${DB_NAME:-heritage_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: heritage_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: ${BACKEND_PORT:-5000}
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-heritage_user}
+      DB_PASSWORD: ${DB_PASSWORD:-heritage_password}
+      DB_NAME: ${DB_NAME:-heritage_db}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - heritage_network
+    command: npm run dev
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: heritage_frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5000/api}
+      CHOKIDAR_USEPOLLING: true
+      WATCHPACK_POLLING: true
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - heritage_network
+    stdin_open: true
+    tty: true
+    command: npm start
+
+networks:
+  heritage_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
