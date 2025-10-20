@@ -7,7 +7,7 @@ const NotFound = () => {
       <h1 style={{ fontSize: '72px', margin: '0' }}>404</h1>
       <h2>Page Not Found</h2>
       <p>The page you're looking for doesn't exist.</p>
-      <Link to="/" className="btn btn-primary">Go Home</Link>
+      <Link to="/" className="btn btn-primary">Go back Home</Link>
     </div>
   );
 };

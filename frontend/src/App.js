@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import {Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 
 // Pages
@@ -11,7 +11,7 @@ import CategoryPage from './pages/CategoryPage';
 import ContentDetail from './pages/ContentDetail';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
-// import NotFound from './pages/NotFound';
+import NotFound from './pages/NotFound';
 
 // Styles
 import './App.css';
@@ -33,9 +33,10 @@ function App() {
         <Route path="/profile/:username" element={<Profile />} />
         
         {/* 404 */}
-        {/* <Route path="*" element={<NotFound />} /> */}
+         <Route path="*" element={<NotFound />} /> 
       </Routes>
     </Layout>
+    
   );
 }
 
