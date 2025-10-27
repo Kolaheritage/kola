@@ -2,28 +2,35 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - fix-notfound-page
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./frontend  # 👈 this is key
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
 
       - name: Install dependencies
         run: npm install
 
+      - name: Build
+        run: npm run build
+
       - name: Run tests
         run: npm test --if-present
-
-      - name: Build project
-        run: npm run build
