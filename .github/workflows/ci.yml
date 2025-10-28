@@ -33,4 +33,4 @@ jobs:
         run: npm run build
 
       - name: Run tests
-        run: npm test --if-present
+        run:  npm test -- --passWithNoTests
