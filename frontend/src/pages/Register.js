@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-//import { Link, useNavigate } from 'react-router-dom';//
+//import { useNavigate } from 'react-router-dom';//
+import { Link } from 'react-router-dom';
 //import apiService from '../services/api';//
 import './Auth.css';
 
