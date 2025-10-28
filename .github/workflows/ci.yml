@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build:
+  build: 
     runs-on: ubuntu-latest
 
     defaults:
@@ -33,4 +33,26 @@ jobs:
         run: npm run build
 
       - name: Run tests
-        run:  npm test -- --passWithNoTests
+        run:  npm test -- --passWithNoTest
+
+        
+  lint:
+   runs-on: ubuntu-latest         
+  
+   steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Use Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+      working-directory: frontend
+
+    - name: Run ESLint
+      run: npm run lint
+      working-directory: frontend
+      
