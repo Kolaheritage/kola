@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import apiService from '../services/api';
+//import apiService from '../services/api';//
 import './Auth.css';
 
 const Register = () => {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();//
   const [formData, setFormData] = useState({
     email: '',
     username: '',

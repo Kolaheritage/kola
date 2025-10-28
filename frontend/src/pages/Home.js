@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import apiService from '../services/api';
+//import apiService from '../services/api';//
 import './Home.css';
 
 const Home = () => {
