@@ -1,14 +1,39 @@
-name: Frontend CI
+name: CI Pipeline
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
-
+  backend:
+    name: Backend - Install & Test
     runs-on: ubuntu-latest
-    
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install backend dependencies
+        run: npm install
+
+      - name: Run backend tests
+        run: npm test --passWithNoTests
+
+  frontend:
+    name: Frontend - Lint & Test
+    runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: ./frontend
@@ -20,11 +45,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: 18
+          cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install Frontend dependencies
         run: npm ci
 
       - name: Run ESLint
@@ -33,30 +58,15 @@ jobs:
       - name: Run Prettier check
         run: npm run format:check
 
-      - name: Run Tests
+      - name: Run frontend tests
         run: npm test --passWithNoTests
 
+  ci-success:
+    name: ✅ All checks passed
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
 
-        run:  npm test -- --passWithNoTest
+    steps:
+      - name: Success
+        run: echo "🎉 All CI checks passed successfully!"
 
-        
-  lint:
-   runs-on: ubuntu-latest         
-  
-   steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Use Node
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
-
-    - name: Install dependencies
-      run: npm install
-      working-directory: frontend
-
-    - name: Run ESLint
-      run: npm run lint
-      working-directory: frontend
-      
