@@ -1,9 +1,10 @@
-name: Frontend CI
+name: CI
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
 
@@ -36,7 +37,6 @@ jobs:
       - name: Run Tests
         run: npm test --passWithNoTests
 
-    
 
         run:  npm test -- --passWithNoTest
 
