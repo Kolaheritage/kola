@@ -17,6 +17,15 @@ class User {
   }
 
   /**
+   * Find user by username
+   */
+  static async findByUsername(username) {
+    const query = 'SELECT * FROM users WHERE username = $1';
+    const result = await db.query(query, [username]);
+    return result.rows[0];
+  }
+
+  /**
    * Find user by ID
    */
   static async findById(id) {
@@ -47,21 +56,39 @@ class User {
     const values = [];
     let paramCount = 1;
 
-    Object.keys(userData).forEach(key => {
-      fields.push(`${key} = $${paramCount}`);
+    Object.keys(userData).forEach((key) => {
+      // Don't allow updating email, username, or password through this method
+      if (['email', 'username', 'password_hash'].includes(key)) {
+        return;
+      }
+      fields.push(`${key} = ${paramCount}`);
       values.push(userData[key]);
       paramCount++;
     });
+
+    if (fields.length === 0) {
+      throw new Error('No valid fields to update');
+    }
 
     values.push(id);
     const query = `
       UPDATE users 
       SET ${fields.join(', ')}, updated_at = NOW()
-      WHERE id = $${paramCount}
-      RETURNING id, email, username, bio, avatar_url, updated_at
+      WHERE id = ${paramCount}
+      RETURNING id, email, username, bio, avatar_url, 
+                cultural_background, is_elder, updated_at
     `;
-    
+
     const result = await db.query(query, values);
+    return result.rows[0];
+  }
+
+  /**
+   * Delete user (soft delete recommended in production)
+   */
+  static async delete(id) {
+    const query = 'DELETE FROM users WHERE id = $1 RETURNING id';
+    const result = await db.query(query, [id]);
     return result.rows[0];
   }
 }

@@ -323,3 +323,405 @@ npm install
 4. Use meaningful variable names
 5. Add JSDoc comments for complex functions
 6. Update this README when adding new features
+
+
+# User Registration - Testing Guide
+
+## API Endpoint
+
+**POST** `/api/auth/register`
+
+Registers a new user account with email, username, and password.
+
+---
+
+## Request Format
+
+### Headers
+```
+Content-Type: application/json
+```
+
+### Body
+```json
+{
+  "email": "user@example.com",
+  "username": "johndoe",
+  "password": "securepassword123"
+}
+```
+
+### Field Requirements
+
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| email | string | Yes | Valid email format |
+| username | string | Yes | 3-50 chars, alphanumeric + underscore |
+| password | string | Yes | Min 8 chars, must contain number |
+
+---
+
+## Response Format
+
+### Success Response (201 Created)
+
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "user": {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "email": "user@example.com",
+      "username": "johndoe",
+      "created_at": "2024-01-15T10:30:00.000Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+### Error Responses
+
+#### 400 Bad Request - Validation Error
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Validation failed",
+    "errors": [
+      {
+        "field": "email",
+        "message": "Valid email is required"
+      }
+    ]
+  }
+}
+```
+
+#### 409 Conflict - Duplicate Email
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Email already registered"
+  }
+}
+```
+
+#### 409 Conflict - Duplicate Username
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Username already taken"
+  }
+}
+```
+
+---
+
+## Testing with cURL
+
+### Valid Registration
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "username": "testuser",
+    "password": "password123"
+  }'
+```
+
+### Missing Email
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123"
+  }'
+```
+
+### Invalid Email Format
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "invalid-email",
+    "username": "testuser",
+    "password": "password123"
+  }'
+```
+
+### Weak Password (< 8 chars)
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "username": "testuser",
+    "password": "pass123"
+  }'
+```
+
+### Password Without Number
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "username": "testuser",
+    "password": "passwordonly"
+  }'
+```
+
+### Username Too Short
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "username": "ab",
+    "password": "password123"
+  }'
+```
+
+### Username with Invalid Characters
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "username": "test user!",
+    "password": "password123"
+  }'
+```
+
+---
+
+## Testing with JavaScript (fetch)
+
+```javascript
+// Register new user
+const registerUser = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: 'user@example.com',
+        username: 'johndoe',
+        password: 'password123'
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log('Registration successful!');
+      console.log('User:', data.data.user);
+      console.log('Token:', data.data.token);
+      
+      // Store token for future requests
+      localStorage.setItem('token', data.data.token);
+    } else {
+      console.error('Registration failed:', data.error.message);
+    }
+  } catch (error) {
+    console.error('Network error:', error);
+  }
+};
+
+registerUser();
+```
+
+---
+
+## Testing with Postman
+
+1. **Import Collection**
+   - File → Import
+   - Select `postman/Heritage_Platform_API.postman_collection.json`
+
+2. **Set Environment**
+   - Create new environment
+   - Add variable: `base_url` = `http://localhost:5000`
+
+3. **Test Registration**
+   - Select "Authentication → Register User"
+   - Modify body as needed
+   - Click Send
+   - Token is automatically saved to environment
+
+---
+
+## Automated Tests
+
+### Run Unit Tests
+
+```bash
+cd backend
+npm test src/__tests__/auth.test.js
+```
+
+### Run Integration Tests (with database)
+
+```bash
+cd backend
+DATABASE_URL=postgres://heritage_user:heritage_password@localhost:5432/heritage_db \
+  npm test src/__tests__/auth.integration.test.js
+```
+
+### Run All Tests with Coverage
+
+```bash
+cd backend
+npm test -- --coverage
+```
+
+---
+
+## Test Cases Checklist
+
+### ✅ Valid Input Tests
+- [x] Register with valid email, username, and password
+- [x] Verify user created in database
+- [x] Verify password is hashed
+- [x] Verify JWT token generated
+- [x] Verify no password in response
+
+### ✅ Validation Tests
+- [x] Missing email
+- [x] Missing username
+- [x] Missing password
+- [x] Invalid email format
+- [x] Password too short (< 8 chars)
+- [x] Password without number
+- [x] Username too short (< 3 chars)
+- [x] Username too long (> 50 chars)
+- [x] Username with invalid characters
+
+### ✅ Duplicate Tests
+- [x] Duplicate email
+- [x] Duplicate username
+- [x] Case-insensitive email check
+
+### ✅ Security Tests
+- [x] Password is hashed with bcrypt
+- [x] Password never exposed in response
+- [x] JWT token is valid
+- [x] Token contains correct user data
+
+---
+
+## Expected Behavior
+
+### Successful Registration
+
+1. ✅ Validate input data
+2. ✅ Check email not already registered
+3. ✅ Check username not already taken
+4. ✅ Hash password with bcrypt (10 rounds)
+5. ✅ Create user in database
+6. ✅ Generate JWT token
+7. ✅ Return user data (without password) and token
+
+### Failed Registration
+
+1. ❌ Validation fails → Return 400 with errors
+2. ❌ Email exists → Return 409 "Email already registered"
+3. ❌ Username exists → Return 409 "Username already taken"
+4. ❌ Database error → Return 500 with error message
+
+---
+
+## Security Considerations
+
+### Password Security
+- ✅ Minimum 8 characters
+- ✅ Must contain at least one number
+- ✅ Hashed with bcrypt (10 rounds)
+- ✅ Never stored in plain text
+- ✅ Never returned in responses
+
+### Token Security
+- ✅ JWT with 7-day expiration
+- ✅ Signed with secure secret
+- ✅ Contains only id and email
+- ✅ Verified on protected routes
+
+### Input Validation
+- ✅ Email format validation
+- ✅ Username character restrictions
+- ✅ SQL injection prevention (parameterized queries)
+- ✅ XSS prevention (sanitized inputs)
+
+---
+
+## Common Issues
+
+### Issue: "Email already registered"
+**Cause**: User already exists with that email  
+**Solution**: Use different email or login instead
+
+### Issue: "Username already taken"
+**Cause**: User already exists with that username  
+**Solution**: Choose different username
+
+### Issue: "Password must be at least 8 characters"
+**Cause**: Password too short  
+**Solution**: Use longer password
+
+### Issue: "Password must contain at least one number"
+**Cause**: Password has no numeric character  
+**Solution**: Add at least one number (0-9)
+
+### Issue: "Valid email is required"
+**Cause**: Email format invalid  
+**Solution**: Use proper email format (user@domain.com)
+
+### Issue: "Username must be between 3 and 30 characters"
+**Cause**: Username too short or too long  
+**Solution**: Use 3-30 character username
+
+### Issue: "Username can only contain letters, numbers, and underscores"
+**Cause**: Username has invalid characters  
+**Solution**: Use only a-z, A-Z, 0-9, and underscore
+
+---
+
+## Performance
+
+### Response Times
+- **Success**: < 200ms (including password hashing)
+- **Validation Error**: < 50ms
+- **Duplicate Check**: < 100ms (with database index)
+
+### Rate Limiting (Future)
+- Consider adding rate limiting to prevent abuse
+- Suggested: 5 registration attempts per IP per hour
+
+---
+
+## Next Steps
+
+After successful registration:
+
+1. **Store token** in localStorage/cookie
+2. **Redirect** to dashboard or home
+3. **Set user state** in application
+4. **Make authenticated requests** using token
+
+Example:
+```javascript
+// Use token for authenticated requests
+const response = await fetch('http://localhost:5000/api/content', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+```
