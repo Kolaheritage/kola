@@ -75,7 +75,44 @@ const register = async (req, res, next) => {
  */
 const login = async (req, res, next) => {
   try {
-    return errorResponse(res, 'Login not yet implemented (HER-11)', 501);
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return errorResponse(res, 'Invalid email or password', 401);
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    if (!isPasswordValid) {
+      return errorResponse(res, 'Invalid email or password', 401);
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      config.jwt.secret,
+      { expiresIn: config.jwt.expiresIn }
+    );
+
+    // Return user data (without password) and token
+    return successResponse(
+      res,
+      {
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          avatar_url: user.avatar_url,
+          bio: user.bio,
+          created_at: user.created_at
+        },
+        token
+      },
+      'Login successful',
+      200
+    );
   } catch (error) {
     next(error);
   }
