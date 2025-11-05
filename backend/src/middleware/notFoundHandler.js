@@ -2,7 +2,7 @@
  * 404 Not Found handler
  * Catches all unmatched routes
  */
-const notFoundHandler = (req, res, next) => {
+const notFoundHandler = (req, res,) => {
   res.status(404).json({
     success: false,
     error: {

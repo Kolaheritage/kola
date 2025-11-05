@@ -2,7 +2,7 @@
  * Global error handler middleware
  * Catches all errors and sends appropriate response
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res,) => {
   console.error('Error:', err);
 
   // Default error
