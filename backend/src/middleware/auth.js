@@ -29,7 +29,7 @@ const auth = async (req, res, next) => {
     };
 
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({
       success: false,
       error: { message: 'Invalid or expired token' }
