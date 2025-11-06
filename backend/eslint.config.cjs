@@ -1,22 +1,20 @@
-const { FlatCompat } = require("@eslint/eslintrc");
-const path = require("path");
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname
-});
+// eslint.config.cjs
+const js = require("@eslint/js");
+const globals = require("globals");
+// const pluginNode = require("@eslint/plugin-node"); // optional if needed
 
 module.exports = [
-  ...compat.extends("eslint:recommended"),
   {
     files: ["**/*.js"],
     languageOptions: {
-      sourceType: "commonjs",
-      ecmaVersion: 2021
+      globals: { ...globals.node },
+      ecmaVersion: "latest",
+      sourceType: "commonjs", // for Node projects
     },
     rules: {
-      // allow unused args if they start with _
-      "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-      "no-console": "off"
-    }
-  }
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-console": "off",
+    },
+  },
+  js.configs.recommended,
 ];
