@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-//import { useNavigate } from 'react-router-dom';//
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-//import apiService from '../services/api';//
+import apiService from '../services/api';
 import './Auth.css';
 
 const Register = () => {
-  //const navigate = useNavigate();//
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -14,45 +14,125 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    label: '',
+    color: ''
+  });
+
+  // Calculate password strength
+  const calculatePasswordStrength = (password) => {
+    let score = 0;
+    if (!password) return { score: 0, label: '', color: '' };
+
+    // Length check
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+
+    // Contains lowercase
+    if (/[a-z]/.test(password)) score++;
+
+    // Contains uppercase
+    if (/[A-Z]/.test(password)) score++;
+
+    // Contains numbers
+    if (/\d/.test(password)) score++;
+
+    // Contains special characters
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    // Determine strength label and color
+    if (score <= 2) {
+      return { score, label: 'Weak', color: '#ef4444' };
+    } else if (score <= 4) {
+      return { score, label: 'Medium', color: '#f59e0b' };
+    } else {
+      return { score, label: 'Strong', color: '#10b981' };
+    }
+  };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    // Update password strength in real-time
+    if (name === 'password') {
+      setPasswordStrength(calculatePasswordStrength(value));
+    }
+  };
+
+  // Enhanced validation
+  const validateForm = () => {
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
+    // Username validation (3-20 chars, alphanumeric and underscore)
+    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!usernameRegex.test(formData.username)) {
+      setError('Username must be 3-20 characters and contain only letters, numbers, and underscores');
+      return false;
+    }
+
+    // Password validation
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return false;
+    }
+
+    // Password strength check
+    if (passwordStrength.score < 3) {
+      setError('Password is too weak. Use a mix of uppercase, lowercase, numbers, and special characters');
+      return false;
+    }
+
+    // Password match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Client-side validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
+    // Validate form
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      // Will be implemented when backend is ready (HER-10)
-      // const data = await apiService.register({
-      //   email: formData.email,
-      //   username: formData.username,
-      //   password: formData.password
-      // });
-      // localStorage.setItem('token', data.token);
-      // navigate('/dashboard');
-      
-      console.log('Register:', formData);
-      alert('Registration not yet implemented (HER-10)');
+      const data = await apiService.register({
+        email: formData.email,
+        username: formData.username,
+        password: formData.password
+      });
+
+      // Store token
+      localStorage.setItem('token', data.data.token);
+
+      // Redirect to dashboard
+      navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      // Handle different error types
+      if (err.error && err.error.message) {
+        setError(err.error.message);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -107,6 +187,28 @@ const Register = () => {
                 minLength="8"
                 placeholder="At least 8 characters"
               />
+              {formData.password && (
+                <div className="password-strength">
+                  <div className="password-strength-bar">
+                    <div
+                      className="password-strength-fill"
+                      style={{
+                        width: `${(passwordStrength.score / 6) * 100}%`,
+                        backgroundColor: passwordStrength.color
+                      }}
+                    />
+                  </div>
+                  <span
+                    className="password-strength-label"
+                    style={{ color: passwordStrength.color }}
+                  >
+                    {passwordStrength.label}
+                  </span>
+                </div>
+              )}
+              <small className="form-hint">
+                Use 8+ characters with a mix of uppercase, lowercase, numbers & symbols
+              </small>
             </div>
 
             <div className="form-group">
