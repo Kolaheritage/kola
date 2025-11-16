@@ -6,7 +6,7 @@ const authRoutes = require('./auth.routes');
 const userRoutes = require('./user.routes');
 const uploadRoutes = require('./upload.routes');
 const contentRoutes = require('./content.routes');
-// const categoryRoutes = require('./category.routes');
+const categoryRoutes = require('./category.routes');
 
 // API info endpoint
 router.get('/', (req, res) => {
@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
       users: '/api/users',
       upload: '/api/upload',
       content: '/api/content',
-      // categories: '/api/categories'
+      categories: '/api/categories'
     }
   });
 });
@@ -31,6 +31,6 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/content', contentRoutes);
-// router.use('/categories', categoryRoutes);
+router.use('/categories', categoryRoutes);
 
 module.exports = router;
