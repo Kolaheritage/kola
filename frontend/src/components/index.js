@@ -4,4 +4,5 @@
  */
 
 export { default as ContentCard } from './ContentCard';
+export { default as CategoryCard } from './CategoryCard';
 export { default as ProtectedRoute } from './ProtectedRoute';
