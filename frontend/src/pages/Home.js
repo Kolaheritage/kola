@@ -1,39 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-//import apiService from '../services/api';//
+import apiService from '../services/api';
+import ContentCard from '../components/ContentCard';
 import './Home.css';
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
+  const [randomContent, setRandomContent] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [contentLoading, setContentLoading] = useState({});
 
-  useEffect(() => {
-    fetchCategories();
+  const fetchAllRandomContent = useCallback(async (categoriesToFetch) => {
+    const contentPromises = categoriesToFetch.map(async (category) => {
+      setContentLoading(prev => ({ ...prev, [category.id]: true }));
+      try {
+        const response = await apiService.getRandomContent(category.id);
+        const contentData = response.data || response;
+        return { categoryId: category.id, content: contentData };
+      } catch (err) {
+        console.error(`Failed to load content for category ${category.id}:`, err);
+        return { categoryId: category.id, content: null };
+      } finally {
+        setContentLoading(prev => ({ ...prev, [category.id]: false }));
+      }
+    });
+
+    const results = await Promise.all(contentPromises);
+    const contentMap = {};
+    results.forEach(({ categoryId, content }) => {
+      if (content) {
+        contentMap[categoryId] = content;
+      }
+    });
+    setRandomContent(contentMap);
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
-      // Will be implemented when backend is ready
-      // const data = await apiService.getCategories();
-      // setCategories(data);
-      
-      // Mock data for now
-      setCategories([
-        { id: 1, name: 'Rituals', icon: '🕯️' },
-        { id: 2, name: 'Dance', icon: '💃' },
-        { id: 3, name: 'Music', icon: '🎵' },
-        { id: 4, name: 'Recipes', icon: '🍲' },
-        { id: 5, name: 'Stories', icon: '📖' },
-        { id: 6, name: 'Crafts', icon: '🎨' }
-      ]);
+      const response = await apiService.getCategories();
+      const categoriesData = response.data || response;
+      setCategories(categoriesData);
+
+      // Fetch random content for each category
+      if (categoriesData && categoriesData.length > 0) {
+        fetchAllRandomContent(categoriesData);
+      }
     } catch (err) {
+      console.error('Failed to load categories:', err);
       setError(err.message || 'Failed to load categories');
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchAllRandomContent]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // Rotation mechanism - refresh random content every 30 seconds
+  useEffect(() => {
+    if (categories.length === 0) return;
+
+    const interval = setInterval(() => {
+      fetchAllRandomContent(categories);
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [categories, fetchAllRandomContent]);
 
   return (
     <div className="home">
@@ -59,27 +94,63 @@ const Home = () => {
       {/* Categories Section */}
       <section className="categories-section">
         <h2 className="section-title">Explore Categories</h2>
-        
-        {loading && <p>Loading categories...</p>}
-        {error && <p className="error-message">{error}</p>}
-        
+
+        {loading && (
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Loading categories...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="error-message">
+            <p>{error}</p>
+            <button onClick={fetchCategories} className="btn btn-primary">
+              Try Again
+            </button>
+          </div>
+        )}
+
         {!loading && !error && (
           <div className="categories-grid">
             {categories.map((category) => (
-              <Link
-                key={category.id}
-                to={`/category/${category.id}`}
-                className="category-card"
-              >
-                <div className="category-icon">{category.icon}</div>
-                <h3 className="category-name">{category.name}</h3>
-                {/* Random content preview will be added later */}
-                <div className="category-preview">
-                  <div className="preview-placeholder">
-                    Explore {category.name}
+              <div key={category.id} className="category-section">
+                <div className="category-header">
+                  <div className="category-header-content">
+                    <span className="category-icon-large">{category.icon}</span>
+                    <h3 className="category-title">{category.name}</h3>
                   </div>
+                  <Link
+                    to={`/category/${category.id}`}
+                    className="category-view-all"
+                  >
+                    View All →
+                  </Link>
                 </div>
-              </Link>
+
+                <div className="category-content-preview">
+                  {contentLoading[category.id] && (
+                    <div className="content-loading">
+                      <div className="spinner-small"></div>
+                    </div>
+                  )}
+
+                  {!contentLoading[category.id] && randomContent[category.id] && (
+                    <ContentCard content={randomContent[category.id]} />
+                  )}
+
+                  {!contentLoading[category.id] && !randomContent[category.id] && (
+                    <Link
+                      to={`/category/${category.id}`}
+                      className="no-content-placeholder"
+                    >
+                      <div className="placeholder-icon">{category.icon}</div>
+                      <p className="placeholder-text">No content yet</p>
+                      <p className="placeholder-subtext">Be the first to share!</p>
+                    </Link>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         )}
