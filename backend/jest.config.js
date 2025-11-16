@@ -17,7 +17,7 @@ module.exports = {
   ],
 
   // Coverage thresholds (optional)
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
@@ -33,7 +33,7 @@ module.exports = {
   ],
 
   // Setup files
-  // setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.js'],
 
   // Timeout
   testTimeout: 10000,
