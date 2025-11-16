@@ -3,46 +3,22 @@ const router = express.Router();
 const { authenticate, authenticateWithUser } = require('../middleware/auth');
 const asyncHandler = require('../utils/asyncHandler');
 const User = require('../models/User.model');
+const profileController = require('../controllers/profile.controller');
+const validate = require('../middleware/validate');
+const { profileUpdateValidation } = require('../utils/validators');
 
 /**
  * User Routes
  * HER-12: JWT Authentication Middleware
- * Example protected routes demonstrating middleware usage
+ * HER-16: User Profile Endpoint
  */
 
 /**
  * @route   GET /api/users/profile
- * @desc    Get current user's profile (using authenticate - lightweight)
+ * @desc    Get current user's profile
  * @access  Private
  */
-router.get(
-  '/profile',
-  authenticate, // Only token info (id, email) attached to req.user
-  asyncHandler(async (req, res) => {
-    // Load user from database using ID from token
-    const user = await User.findById(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: 'User not found',
-          code: 'USER_NOT_FOUND'
-        }
-      });
-    }
-
-    // Remove password hash
-    const { password_hash, ...userWithoutPassword } = user;
-
-    res.json({
-      success: true,
-      data: {
-        user: userWithoutPassword
-      }
-    });
-  })
-);
+router.get('/profile', authenticate, profileController.getProfile);
 
 /**
  * @route   GET /api/users/me
@@ -71,36 +47,9 @@ router.get(
 router.put(
   '/profile',
   authenticate,
-  asyncHandler(async (req, res) => {
-    const { username, bio, avatar_url } = req.body;
-
-    // Only allow updating certain fields
-    const allowedUpdates = {};
-    if (username !== undefined) allowedUpdates.username = username;
-    if (bio !== undefined) allowedUpdates.bio = bio;
-    if (avatar_url !== undefined) allowedUpdates.avatar_url = avatar_url;
-
-    // Update user
-    const updatedUser = await User.update(req.user.id, allowedUpdates);
-
-    if (!updatedUser) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: 'User not found',
-          code: 'USER_NOT_FOUND'
-        }
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      data: {
-        user: updatedUser
-      }
-    });
-  })
+  profileUpdateValidation,
+  validate,
+  profileController.updateProfile
 );
 
 /**
