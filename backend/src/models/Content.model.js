@@ -284,6 +284,61 @@ class Content {
     const result = await db.query(query, [id]);
     return result.rows[0];
   }
+
+  /**
+   * Get random content from a specific category
+   * HER-24: Get Random Content for Home Page
+   * @param {string} categoryId - Category UUID
+   * @param {string} status - Content status (default: 'published')
+   * @returns {Promise<Object>} - Random content item
+   */
+  static async getRandomByCategory(categoryId, status = 'published') {
+    const query = `
+      SELECT
+        c.*,
+        u.username, u.avatar_url as user_avatar,
+        cat.name as category_name, cat.slug as category_slug, cat.icon as category_icon
+      FROM content c
+      LEFT JOIN users u ON c.user_id = u.id
+      LEFT JOIN categories cat ON c.category_id = cat.id
+      WHERE c.category_id = $1 AND c.status = $2
+      ORDER BY RANDOM()
+      LIMIT 1
+    `;
+    const result = await db.query(query, [categoryId, status]);
+    return result.rows[0];
+  }
+
+  /**
+   * Get one random content item per category
+   * HER-24: Get Random Content for Home Page
+   * @param {string} status - Content status (default: 'published')
+   * @returns {Promise<Array>} - Array of random content items (one per category)
+   */
+  static async getRandomPerCategory(status = 'published') {
+    // Use DISTINCT ON to get one random item per category
+    // First get all categories, then get one random item for each
+    const query = `
+      SELECT DISTINCT ON (cat.id)
+        c.*,
+        u.username, u.avatar_url as user_avatar,
+        cat.id as category_id, cat.name as category_name,
+        cat.slug as category_slug, cat.icon as category_icon
+      FROM categories cat
+      LEFT JOIN LATERAL (
+        SELECT *
+        FROM content
+        WHERE category_id = cat.id AND status = $1
+        ORDER BY RANDOM()
+        LIMIT 1
+      ) c ON true
+      LEFT JOIN users u ON c.user_id = u.id
+      WHERE c.id IS NOT NULL
+      ORDER BY cat.id, RANDOM()
+    `;
+    const result = await db.query(query, [status]);
+    return result.rows;
+  }
 }
 
 module.exports = Content;

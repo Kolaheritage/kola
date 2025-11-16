@@ -9,6 +9,7 @@ const { contentValidation } = require('../utils/validators');
  * Content Routes
  * HER-22: Create Content Endpoint
  * HER-23: Get Content by Category Endpoint
+ * HER-24: Get Random Content for Home Page
  * Handles content post operations
  */
 
@@ -19,6 +20,14 @@ const { contentValidation } = require('../utils/validators');
  * @query   category_id, user_id, status, limit, offset, sort, tags
  */
 router.get('/', contentController.getAllContent);
+
+/**
+ * @route   GET /api/content/random
+ * @desc    Get random content for home page
+ * @access  Public
+ * @query   category_id (optional), status
+ */
+router.get('/random', contentController.getRandomContent);
 
 /**
  * @route   GET /api/content/category/:categoryId

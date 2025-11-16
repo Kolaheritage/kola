@@ -1,6 +1,7 @@
 const Content = require('../models/Content.model');
 const Category = require('../models/Category.model');
 const asyncHandler = require('../utils/asyncHandler');
+const cache = require('../utils/cache');
 
 /**
  * Content Controller
@@ -405,6 +406,98 @@ const getContentByCategory = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Get random content for home page
+ * GET /api/content/random
+ * @route GET /api/content/random
+ * @access Public
+ * @query category_id (optional) - If provided, returns 1 random from that category
+ * HER-24: Get Random Content for Home Page
+ */
+const getRandomContent = asyncHandler(async (req, res) => {
+  const { category_id, status = 'published' } = req.query;
+
+  // Create cache key
+  const cacheKey = category_id
+    ? `random_content_category_${category_id}_${status}`
+    : `random_content_all_${status}`;
+
+  // Check cache first
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.json({
+      success: true,
+      data: cachedData,
+      cached: true
+    });
+  }
+
+  let content;
+
+  if (category_id) {
+    // Get random content from specific category
+    const category = await Category.findById(category_id);
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: 'Category not found',
+          code: 'CATEGORY_NOT_FOUND'
+        }
+      });
+    }
+
+    const randomContent = await Content.getRandomByCategory(category_id, status);
+
+    if (!randomContent) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: 'No content found in this category',
+          code: 'NO_CONTENT_FOUND'
+        }
+      });
+    }
+
+    content = {
+      category: {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        icon: category.icon
+      },
+      content: randomContent
+    };
+  } else {
+    // Get one random content per category
+    const randomContentPerCategory = await Content.getRandomPerCategory(status);
+
+    if (!randomContentPerCategory || randomContentPerCategory.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: 'No content found',
+          code: 'NO_CONTENT_FOUND'
+        }
+      });
+    }
+
+    content = {
+      content: randomContentPerCategory,
+      count: randomContentPerCategory.length
+    };
+  }
+
+  // Cache the result for 5 minutes (300000 ms)
+  cache.set(cacheKey, content, 300000);
+
+  res.json({
+    success: true,
+    data: content,
+    cached: false
+  });
+});
+
 module.exports = {
   createContent,
   getAllContent,
@@ -412,5 +505,6 @@ module.exports = {
   updateContent,
   deleteContent,
   getMyContent,
-  getContentByCategory
+  getContentByCategory,
+  getRandomContent
 };
