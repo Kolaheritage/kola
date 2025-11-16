@@ -25,6 +25,7 @@ const generateToken = (payload) => {
  * Verify JWT token
  * @param {string} token - JWT token to verify
  * @returns {Object} Decoded token payload
+ * @throws {Error} Throws original JWT error (TokenExpiredError, JsonWebTokenError, etc.)
  */
 const verifyToken = (token) => {
   const secret = process.env.JWT_SECRET;
@@ -33,11 +34,9 @@ const verifyToken = (token) => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  try {
-    return jwt.verify(token, secret);
-  } catch (error) {
-    throw new Error('Invalid or expired token');
-  }
+  // Let jwt.verify throw its own errors (TokenExpiredError, JsonWebTokenError, etc.)
+  // This allows middleware to distinguish between different error types
+  return jwt.verify(token, secret);
 };
 
 /**
