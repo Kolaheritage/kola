@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-//import { useNavigate } from 'react-router-dom';//
-import { Link } from 'react-router-dom';
-//import apiService from '../services/api';//
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import apiService from '../services/api';
 import './Auth.css';
 
 const Login = () => {
-  //const navigate = useNavigate();//
+  const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -20,21 +21,51 @@ const Login = () => {
     });
   };
 
+  const handleRememberMeChange = (e) => {
+    setRememberMe(e.target.checked);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Will be implemented when backend is ready (HER-11)
-      // const data = await apiService.login(formData);
-      // localStorage.setItem('token', data.token);
-      // navigate('/dashboard');
-      
-      console.log('Login:', formData);
-      alert('Login not yet implemented (HER-11)');
+      const data = await apiService.login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Store token based on "Remember me" option
+      // localStorage persists across browser sessions
+      // sessionStorage is cleared when the browser is closed
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem('token', data.data.token);
+
+      // Also store user info
+      if (data.data.user) {
+        storage.setItem('user', JSON.stringify(data.data.user));
+      }
+
+      // Redirect to the page user was trying to access, or dashboard
+      const from = location.state?.from?.pathname || '/dashboard';
+      navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      // Handle different error types
+      if (err.error && err.error.message) {
+        setError(err.error.message);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Login failed. Please check your credentials and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -76,8 +107,22 @@ const Login = () => {
               />
             </div>
 
-            <button 
-              type="submit" 
+            <div className="form-options">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={handleRememberMeChange}
+                />
+                <span>Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="forgot-password-link">
+                Forgot password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
               className="btn btn-primary btn-full"
               disabled={loading}
             >
