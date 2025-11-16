@@ -9,17 +9,17 @@ const db = require('../config/database');
 class Content {
   /**
    * Find all content (with optional filters)
-   * @param {Object} filters - Optional filters (category_id, user_id, status, limit, offset)
+   * @param {Object} filters - Optional filters (category_id, user_id, status, limit, offset, sort)
    * @returns {Promise<Array>} - Array of content posts
    */
   static async findAll(filters = {}) {
-    const { category_id, user_id, status, limit = 20, offset = 0 } = filters;
+    const { category_id, user_id, status, limit = 20, offset = 0, sort = 'recent' } = filters;
 
     let query = `
       SELECT
         c.*,
         u.username, u.avatar_url as user_avatar,
-        cat.name as category_name, cat.slug as category_slug
+        cat.name as category_name, cat.slug as category_slug, cat.icon as category_icon
       FROM content c
       LEFT JOIN users u ON c.user_id = u.id
       LEFT JOIN categories cat ON c.category_id = cat.id
@@ -46,7 +46,17 @@ class Content {
       paramCount++;
     }
 
-    query += ` ORDER BY c.created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+    // Add sorting
+    let orderBy = 'c.created_at DESC'; // Default: recent
+    if (sort === 'popular') {
+      orderBy = 'c.view_count DESC, c.created_at DESC';
+    } else if (sort === 'most_liked') {
+      orderBy = 'c.likes DESC, c.created_at DESC';
+    } else if (sort === 'oldest') {
+      orderBy = 'c.created_at ASC';
+    }
+
+    query += ` ORDER BY ${orderBy} LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     params.push(limit, offset);
 
     const result = await db.query(query, params);
@@ -222,6 +232,57 @@ class Content {
     `;
     const result = await db.query(query, [tags]);
     return result.rows;
+  }
+
+  /**
+   * Increment view count for a content post
+   * HER-23: Track content views
+   * @param {string} id - Content UUID
+   * @returns {Promise<Object>} - Updated content post
+   */
+  static async incrementViewCount(id) {
+    const query = `
+      UPDATE content
+      SET view_count = view_count + 1
+      WHERE id = $1
+      RETURNING view_count
+    `;
+    const result = await db.query(query, [id]);
+    return result.rows[0];
+  }
+
+  /**
+   * Increment likes for a content post
+   * HER-23: Track content likes
+   * @param {string} id - Content UUID
+   * @returns {Promise<Object>} - Updated content post
+   */
+  static async incrementLikes(id) {
+    const query = `
+      UPDATE content
+      SET likes = likes + 1
+      WHERE id = $1
+      RETURNING likes
+    `;
+    const result = await db.query(query, [id]);
+    return result.rows[0];
+  }
+
+  /**
+   * Decrement likes for a content post
+   * HER-23: Track content likes
+   * @param {string} id - Content UUID
+   * @returns {Promise<Object>} - Updated content post
+   */
+  static async decrementLikes(id) {
+    const query = `
+      UPDATE content
+      SET likes = GREATEST(likes - 1, 0)
+      WHERE id = $1
+      RETURNING likes
+    `;
+    const result = await db.query(query, [id]);
+    return result.rows[0];
   }
 }
 

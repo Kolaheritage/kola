@@ -8,6 +8,7 @@ const { contentValidation } = require('../utils/validators');
 /**
  * Content Routes
  * HER-22: Create Content Endpoint
+ * HER-23: Get Content by Category Endpoint
  * Handles content post operations
  */
 
@@ -15,14 +16,23 @@ const { contentValidation } = require('../utils/validators');
  * @route   GET /api/content
  * @desc    Get all content posts (with optional filters)
  * @access  Public
- * @query   category_id, user_id, status, limit, offset, tags
+ * @query   category_id, user_id, status, limit, offset, sort, tags
  */
 router.get('/', contentController.getAllContent);
+
+/**
+ * @route   GET /api/content/category/:categoryId
+ * @desc    Get content posts by category
+ * @access  Public
+ * @query   limit, offset, sort, status
+ */
+router.get('/category/:categoryId', contentController.getContentByCategory);
 
 /**
  * @route   GET /api/content/me
  * @desc    Get current user's content posts
  * @access  Private
+ * @query   limit, offset, sort, status
  */
 router.get('/me', authenticate, contentController.getMyContent);
 

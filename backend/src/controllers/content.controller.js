@@ -88,6 +88,7 @@ const getAllContent = asyncHandler(async (req, res) => {
     status = 'published',
     limit = 20,
     offset = 0,
+    sort = 'recent',
     tags
   } = req.query;
 
@@ -108,7 +109,8 @@ const getAllContent = asyncHandler(async (req, res) => {
   // Build filters
   const filters = {
     limit: parseInt(limit),
-    offset: parseInt(offset)
+    offset: parseInt(offset),
+    sort
   };
 
   if (category_id) filters.category_id = category_id;
@@ -152,6 +154,14 @@ const getContentById = asyncHandler(async (req, res) => {
         code: 'CONTENT_NOT_FOUND'
       }
     });
+  }
+
+  // Increment view count (HER-23)
+  try {
+    await Content.incrementViewCount(id);
+  } catch (error) {
+    // Don't fail the request if view count increment fails
+    console.error('Failed to increment view count:', error);
   }
 
   res.json({
@@ -303,12 +313,13 @@ const deleteContent = asyncHandler(async (req, res) => {
  * @access Private
  */
 const getMyContent = asyncHandler(async (req, res) => {
-  const { limit = 20, offset = 0, status } = req.query;
+  const { limit = 20, offset = 0, status, sort = 'recent' } = req.query;
 
   const filters = {
     user_id: req.user.id,
     limit: parseInt(limit),
-    offset: parseInt(offset)
+    offset: parseInt(offset),
+    sort
   };
 
   if (status) filters.status = status;
@@ -330,11 +341,76 @@ const getMyContent = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * Get content by category
+ * GET /api/content/category/:categoryId
+ * @route GET /api/content/category/:categoryId
+ * @access Public
+ * HER-23: Get Content by Category Endpoint
+ */
+const getContentByCategory = asyncHandler(async (req, res) => {
+  const { categoryId } = req.params;
+  const {
+    limit = 20,
+    offset = 0,
+    sort = 'recent',
+    status = 'published'
+  } = req.query;
+
+  // Verify category exists
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    return res.status(404).json({
+      success: false,
+      error: {
+        message: 'Category not found',
+        code: 'CATEGORY_NOT_FOUND'
+      }
+    });
+  }
+
+  // Build filters
+  const filters = {
+    category_id: categoryId,
+    status,
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    sort
+  };
+
+  // Get content and count
+  const content = await Content.findAll(filters);
+  const total = await Content.count({ category_id: categoryId, status });
+
+  res.json({
+    success: true,
+    data: {
+      category: {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        icon: category.icon,
+        description: category.description
+      },
+      content,
+      pagination: {
+        total,
+        limit: filters.limit,
+        offset: filters.offset,
+        page: Math.floor(filters.offset / filters.limit) + 1,
+        totalPages: Math.ceil(total / filters.limit),
+        hasMore: filters.offset + content.length < total
+      }
+    }
+  });
+});
+
 module.exports = {
   createContent,
   getAllContent,
   getContentById,
   updateContent,
   deleteContent,
-  getMyContent
+  getMyContent,
+  getContentByCategory
 };
