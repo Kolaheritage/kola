@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-// Import route modules (will be created in future tasks)
-// const authRoutes = require('./auth.routes');
-// const userRoutes = require('./user.routes');
+// Import route modules
+const authRoutes = require('./auth.routes');
+const userRoutes = require('./user.routes');
 // const contentRoutes = require('./content.routes');
 // const categoryRoutes = require('./category.routes');
 
@@ -16,17 +16,17 @@ router.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       api: '/api',
-      // auth: '/api/auth',
-      // users: '/api/users',
+      auth: '/api/auth',
+      users: '/api/users',
       // content: '/api/content',
       // categories: '/api/categories'
     }
   });
 });
 
-// Mount route modules (uncomment as they are created)
-// router.use('/auth', authRoutes);
-// router.use('/users', userRoutes);
+// Mount route modules
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 // router.use('/content', contentRoutes);
 // router.use('/categories', categoryRoutes);
 
