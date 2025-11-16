@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 const Header = () => {
-  const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Will be managed by Auth Context later
+  const { isAuthenticated, user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    navigate('/');
+    logout();
+    setMenuOpen(false);
   };
 
   return (
@@ -30,7 +29,7 @@ const Header = () => {
 
         {/* Auth Buttons */}
         <div className="header-actions">
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <>
               <Link to="/upload" className="btn btn-primary">
                 Share Idea Now
@@ -76,11 +75,19 @@ const Header = () => {
           <Link to="/explore" className="nav-link-mobile" onClick={() => setMenuOpen(false)}>
             Explore
           </Link>
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <>
               <Link to="/dashboard" className="nav-link-mobile" onClick={() => setMenuOpen(false)}>
                 Dashboard
               </Link>
+              <Link to="/upload" className="nav-link-mobile" onClick={() => setMenuOpen(false)}>
+                Upload
+              </Link>
+              {user && (
+                <Link to={`/profile/${user.username}`} className="nav-link-mobile" onClick={() => setMenuOpen(false)}>
+                  Profile ({user.username})
+                </Link>
+              )}
               <button onClick={handleLogout} className="nav-link-mobile">
                 Logout
               </button>

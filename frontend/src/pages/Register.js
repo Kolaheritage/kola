@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import apiService from '../services/api';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -113,26 +113,21 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const data = await apiService.register({
+      // Use AuthContext register function
+      const result = await register({
         email: formData.email,
         username: formData.username,
         password: formData.password
       });
 
-      // Store token
-      localStorage.setItem('token', data.data.token);
-
-      // Redirect to dashboard
-      navigate('/dashboard');
-    } catch (err) {
-      // Handle different error types
-      if (err.error && err.error.message) {
-        setError(err.error.message);
-      } else if (err.message) {
-        setError(err.message);
+      if (result.success) {
+        // Redirect to dashboard
+        navigate('/dashboard', { replace: true });
       } else {
-        setError('Registration failed. Please try again.');
+        setError(result.error);
       }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

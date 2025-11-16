@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import apiService from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -38,34 +39,24 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const data = await apiService.login({
-        email: formData.email,
-        password: formData.password
-      });
+      // Use AuthContext login function
+      const result = await login(
+        {
+          email: formData.email,
+          password: formData.password
+        },
+        rememberMe
+      );
 
-      // Store token based on "Remember me" option
-      // localStorage persists across browser sessions
-      // sessionStorage is cleared when the browser is closed
-      const storage = rememberMe ? localStorage : sessionStorage;
-      storage.setItem('token', data.data.token);
-
-      // Also store user info
-      if (data.data.user) {
-        storage.setItem('user', JSON.stringify(data.data.user));
-      }
-
-      // Redirect to the page user was trying to access, or dashboard
-      const from = location.state?.from?.pathname || '/dashboard';
-      navigate(from, { replace: true });
-    } catch (err) {
-      // Handle different error types
-      if (err.error && err.error.message) {
-        setError(err.error.message);
-      } else if (err.message) {
-        setError(err.message);
+      if (result.success) {
+        // Redirect to the page user was trying to access, or dashboard
+        const from = location.state?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
       } else {
-        setError('Login failed. Please check your credentials and try again.');
+        setError(result.error);
       }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
