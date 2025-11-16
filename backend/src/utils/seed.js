@@ -64,6 +64,69 @@ async function seedUsers() {
 }
 
 /**
+ * Seed categories
+ * HER-20: Categories Seed Data
+ */
+async function seedCategories() {
+  console.log('📂 Seeding categories...');
+
+  const categories = [
+    {
+      name: 'Rituals',
+      slug: 'rituals',
+      description: 'Traditional ceremonies, customs, and sacred practices passed down through generations',
+      icon: '🕯️'
+    },
+    {
+      name: 'Dance',
+      slug: 'dance',
+      description: 'Traditional and cultural dance forms, movements, and performances that tell our stories',
+      icon: '💃'
+    },
+    {
+      name: 'Music',
+      slug: 'music',
+      description: 'Traditional songs, instruments, rhythms, and musical heritage from our cultures',
+      icon: '🎵'
+    },
+    {
+      name: 'Recipes',
+      slug: 'recipes',
+      description: 'Traditional cooking methods, family recipes, and culinary heritage from our ancestors',
+      icon: '🍲'
+    },
+    {
+      name: 'Stories',
+      slug: 'stories',
+      description: 'Oral histories, legends, folktales, and narratives that preserve our cultural wisdom',
+      icon: '📖'
+    },
+    {
+      name: 'Crafts',
+      slug: 'crafts',
+      description: 'Traditional artisan skills, handicrafts, and artistic techniques from our heritage',
+      icon: '🎨'
+    }
+  ];
+
+  for (const category of categories) {
+    try {
+      // Insert category (ignore if already exists)
+      await pool.query(
+        `INSERT INTO categories (name, slug, description, icon)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (slug) DO NOTHING`,
+        [category.name, category.slug, category.description, category.icon]
+      );
+
+      console.log(`  ✅ Created category: ${category.name} ${category.icon}`);
+    } catch (error) {
+      console.error(`  ❌ Error creating category ${category.name}:`, error.message);
+    }
+  }
+}
+
+/**
  * Main seed function
  */
 async function seed() {
@@ -73,8 +136,10 @@ async function seed() {
     // Seed users
     await seedUsers();
 
+    // Seed categories
+    await seedCategories();
+
     // Add more seed functions here as needed
-    // await seedCategories();
     // await seedContent();
 
     console.log('🎉 Database seeding completed!');
@@ -91,4 +156,4 @@ if (require.main === module) {
   seed();
 }
 
-module.exports = { seed, seedUsers };
+module.exports = { seed, seedUsers, seedCategories };

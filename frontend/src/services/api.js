@@ -94,9 +94,10 @@ const apiService = {
     api.delete(`/content/${contentId}/comments/${commentId}`),
 
   // Upload
-  uploadFile: (formData) => 
+  uploadFile: (formData, onUploadProgress) =>
     api.post('/upload', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress,
     }),
 };
 

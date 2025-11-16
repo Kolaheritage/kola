@@ -35,6 +35,8 @@ const loginValidation = [
 const contentValidation = [
   body('title')
     .trim()
+    .notEmpty()
+    .withMessage('Title is required')
     .isLength({ min: 3, max: 200 })
     .withMessage('Title must be between 3 and 200 characters'),
   body('description')
@@ -43,8 +45,33 @@ const contentValidation = [
     .isLength({ max: 5000 })
     .withMessage('Description must not exceed 5000 characters'),
   body('category_id')
-    .isInt({ min: 1 })
-    .withMessage('Valid category ID is required')
+    .notEmpty()
+    .withMessage('Category ID is required')
+    .isUUID()
+    .withMessage('Valid category ID (UUID) is required'),
+  body('media_url')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Media URL must not exceed 500 characters'),
+  body('thumbnail_url')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Thumbnail URL must not exceed 500 characters'),
+  body('tags')
+    .optional()
+    .isArray()
+    .withMessage('Tags must be an array'),
+  body('tags.*')
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Each tag must be between 1 and 50 characters'),
+  body('status')
+    .optional()
+    .isIn(['draft', 'published', 'archived'])
+    .withMessage('Status must be one of: draft, published, archived')
 ];
 
 const profileUpdateValidation = [
