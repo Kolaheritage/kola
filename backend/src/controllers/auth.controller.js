@@ -1,124 +1,146 @@
+const bcrypt = require('bcryptjs');
+const User = require('../models/User.model');
+const { generateToken } = require('../utils/jwt');
+const asyncHandler = require('../utils/asyncHandler');
+
 /**
  * Authentication Controller
- * Handles user registration and login
+ * HER-11: User Login Backend
  */
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User.model');
-const config = require('../config/app');
-const { successResponse, errorResponse } = require('../utils/response');
-
 /**
- * Register a new user
- * POST /api/auth/register
- */
-const register = async (req, res, next) => {
-  try {
-    const { email, username, password } = req.body;
-
-    // Check if user already exists
-    const existingUserByEmail = await User.findByEmail(email);
-    if (existingUserByEmail) {
-      return errorResponse(res, 'Email already registered', 409);
-    }
-
-    const existingUserByUsername = await User.findByUsername(username);
-    if (existingUserByUsername) {
-      return errorResponse(res, 'Username already taken', 409);
-    }
-
-    // Hash password
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-
-    // Create user
-    const userData = {
-      email,
-      username,
-      password_hash: passwordHash
-    };
-
-    const newUser = await User.create(userData);
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: newUser.id, email: newUser.email },
-      config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
-    );
-
-    // Return user data (without password) and token
-    return successResponse(
-      res,
-      {
-        user: {
-          id: newUser.id,
-          email: newUser.email,
-          username: newUser.username,
-          created_at: newUser.created_at
-        },
-        token
-      },
-      'User registered successfully',
-      201
-    );
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Login user
+ * User Login
  * POST /api/auth/login
- * Will be implemented in HER-11
+ * @route POST /api/auth/login
+ * @access Public
  */
-const login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    // Find user by email
-    const user = await User.findByEmail(email);
-    if (!user) {
-      return errorResponse(res, 'Invalid email or password', 401);
-    }
+  // Find user by email
+  const user = await User.findByEmail(email);
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    if (!isPasswordValid) {
-      return errorResponse(res, 'Invalid email or password', 401);
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
-    );
-
-    // Return user data (without password) and token
-    return successResponse(
-      res,
-      {
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          avatar_url: user.avatar_url,
-          bio: user.bio,
-          created_at: user.created_at
-        },
-        token
-      },
-      'Login successful',
-      200
-    );
-  } catch (error) {
-    next(error);
+  // Check if user exists
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        message: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS'
+      }
+    });
   }
-};
+
+  // Check if user is active
+  if (!user.is_active) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        message: 'Account is deactivated',
+        code: 'ACCOUNT_DEACTIVATED'
+      }
+    });
+  }
+
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+  if (!isPasswordValid) {
+    return res.status(401).json({
+      success: false,
+      error: {
+        message: 'Invalid credentials',
+        code: 'INVALID_CREDENTIALS'
+      }
+    });
+  }
+
+  // Generate JWT token
+  const token = generateToken({
+    id: user.id,
+    email: user.email
+  });
+
+  // Remove password_hash from user object
+  const { password_hash, ...userWithoutPassword } = user;
+
+  // Return success response
+  res.json({
+    success: true,
+    message: 'Login successful',
+    data: {
+      user: userWithoutPassword,
+      token
+    }
+  });
+});
+
+/**
+ * User Registration
+ * POST /api/auth/register
+ * @route POST /api/auth/register
+ * @access Public
+ * Note: Will be implemented in HER-10 or can be added here
+ */
+const register = asyncHandler(async (req, res) => {
+  const { email, username, password } = req.body;
+
+  // Check if user already exists
+  const existingUser = await User.findByEmail(email);
+  if (existingUser) {
+    return res.status(409).json({
+      success: false,
+      error: {
+        message: 'User with this email already exists',
+        code: 'USER_EXISTS'
+      }
+    });
+  }
+
+  // Hash password
+  const saltRounds = 10;
+  const password_hash = await bcrypt.hash(password, saltRounds);
+
+  // Create user
+  const user = await User.create({
+    email,
+    username,
+    password_hash
+  });
+
+  // Generate JWT token
+  const token = generateToken({
+    id: user.id,
+    email: user.email
+  });
+
+  // Return success response
+  res.status(201).json({
+    success: true,
+    message: 'User registered successfully',
+    data: {
+      user,
+      token
+    }
+  });
+});
+
+/**
+ * Logout
+ * POST /api/auth/logout
+ * @route POST /api/auth/logout
+ * @access Private
+ * Note: With JWT, logout is handled client-side by removing the token
+ */
+const logout = asyncHandler(async (req, res) => {
+  res.json({
+    success: true,
+    message: 'Logout successful'
+  });
+});
 
 module.exports = {
+  login,
   register,
-  login
+  logout
 };

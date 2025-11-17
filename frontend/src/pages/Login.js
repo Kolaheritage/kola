@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import apiService from '../services/api';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -19,21 +22,41 @@ const Login = () => {
     });
   };
 
+  const handleRememberMeChange = (e) => {
+    setRememberMe(e.target.checked);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Will be implemented when backend is ready (HER-11)
-      // const data = await apiService.login(formData);
-      // localStorage.setItem('token', data.token);
-      // navigate('/dashboard');
-      
-      console.log('Login:', formData);
-      alert('Login not yet implemented (HER-11)');
+      // Use AuthContext login function
+      const result = await login(
+        {
+          email: formData.email,
+          password: formData.password
+        },
+        rememberMe
+      );
+
+      if (result.success) {
+        // Redirect to the page user was trying to access, or dashboard
+        const from = location.state?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
+      } else {
+        setError(result.error);
+      }
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -75,8 +98,22 @@ const Login = () => {
               />
             </div>
 
-            <button 
-              type="submit" 
+            <div className="form-options">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={handleRememberMeChange}
+                />
+                <span>Remember me</span>
+              </label>
+              <Link to="/forgot-password" className="forgot-password-link">
+                Forgot password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
               className="btn btn-primary btn-full"
               disabled={loading}
             >

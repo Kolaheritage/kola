@@ -1,3 +1,41 @@
+# name: Frontend CI
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#       - ci-clean-fix  # Add any other branch you want CI for
+
+# jobs:
+#   frontend:
+#     name: Frontend - Lint & Test
+#     runs-on: ubuntu-latest
+#     defaults:
+#       run:
+#         working-directory: ./frontend
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '18'
+#           cache: 'npm'
+#           cache-dependency-path: package-lock.json
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Run ESLint
+#         run: npm run lint
+
+      
+
+#       - name: Run Tests
+#         run: npm test -- --passWithNoTests
+
 name: KOLA CI
 
 on:

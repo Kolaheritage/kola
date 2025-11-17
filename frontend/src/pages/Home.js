@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../services/api';
+import CategoryCard from '../components/CategoryCard';
 import './Home.css';
 
 const Home = () => {
@@ -8,32 +9,23 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
-      // Will be implemented when backend is ready
-      // const data = await apiService.getCategories();
-      // setCategories(data);
-      
-      // Mock data for now
-      setCategories([
-        { id: 1, name: 'Rituals', icon: '🕯️' },
-        { id: 2, name: 'Dance', icon: '💃' },
-        { id: 3, name: 'Music', icon: '🎵' },
-        { id: 4, name: 'Recipes', icon: '🍲' },
-        { id: 5, name: 'Stories', icon: '📖' },
-        { id: 6, name: 'Crafts', icon: '🎨' }
-      ]);
+      const response = await apiService.getCategories();
+      const categoriesData = response.data || response;
+      setCategories(categoriesData);
     } catch (err) {
+      console.error('Failed to load categories:', err);
       setError(err.message || 'Failed to load categories');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   return (
     <div className="home">
@@ -59,27 +51,31 @@ const Home = () => {
       {/* Categories Section */}
       <section className="categories-section">
         <h2 className="section-title">Explore Categories</h2>
-        
-        {loading && <p>Loading categories...</p>}
-        {error && <p className="error-message">{error}</p>}
-        
+
+        {loading && (
+          <div className="loading-container">
+            <div className="spinner"></div>
+            <p>Loading categories...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="error-message">
+            <p>{error}</p>
+            <button onClick={fetchCategories} className="btn btn-primary">
+              Try Again
+            </button>
+          </div>
+        )}
+
         {!loading && !error && (
           <div className="categories-grid">
-            {categories.map((category) => (
-              <Link
+            {categories.map((category, index) => (
+              <CategoryCard
                 key={category.id}
-                to={`/category/${category.id}`}
-                className="category-card"
-              >
-                <div className="category-icon">{category.icon}</div>
-                <h3 className="category-name">{category.name}</h3>
-                {/* Random content preview will be added later */}
-                <div className="category-preview">
-                  <div className="preview-placeholder">
-                    Explore {category.name}
-                  </div>
-                </div>
-              </Link>
+                category={category}
+                style={{ animationDelay: `${index * 0.1}s` }}
+              />
             ))}
           </div>
         )}
