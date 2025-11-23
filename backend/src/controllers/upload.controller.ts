@@ -116,65 +116,63 @@ const uploadFile = asyncHandler(async (req: Request, res: Response) => {
  * @route DELETE /api/upload/:filename
  * @access Private (requires authentication)
  */
-const deleteUploadedFile = asyncHandler(
-  async (req: Request<{ filename: string }, {}, {}, DeleteQueryParams>, res: Response) => {
-    const { filename } = req.params;
-    const { type } = req.query; // 'image' or 'video'
+const deleteUploadedFile = asyncHandler(async (req: Request, res: Response) => {
+  const { filename } = req.params as { filename: string };
+  const { type } = req.query as DeleteQueryParams;
 
-    if (!filename) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Filename is required',
-          code: 'FILENAME_REQUIRED',
-        },
-      } as ErrorResponse);
-    }
-
-    if (!type || !['image', 'video'].includes(type)) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Valid file type is required (image or video)',
-          code: 'INVALID_FILE_TYPE',
-        },
-      } as ErrorResponse);
-    }
-
-    try {
-      // Construct file path
-      const uploadsDir = path.join(__dirname, '../../uploads');
-      const filePath = path.join(uploadsDir, `${type}s`, filename);
-
-      // Delete main file
-      const fileDeleted = await deleteFile(filePath);
-
-      // Try to delete thumbnail if it exists
-      const thumbnailFilename = `thumb-${filename.replace(path.extname(filename), path.extname(filename))}`;
-      await deleteThumbnail(thumbnailFilename);
-
-      if (!fileDeleted) {
-        return res.status(404).json({
-          success: false,
-          error: {
-            message: 'File not found',
-            code: 'FILE_NOT_FOUND',
-          },
-        } as ErrorResponse);
-      }
-
-      res.json({
-        success: true,
-        message: 'File deleted successfully',
-        data: {
-          filename: filename,
-        },
-      });
-    } catch (error) {
-      throw error;
-    }
+  if (!filename) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: 'Filename is required',
+        code: 'FILENAME_REQUIRED',
+      },
+    } as ErrorResponse);
   }
-);
+
+  if (!type || !['image', 'video'].includes(type)) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: 'Valid file type is required (image or video)',
+        code: 'INVALID_FILE_TYPE',
+      },
+    } as ErrorResponse);
+  }
+
+  try {
+    // Construct file path
+    const uploadsDir = path.join(__dirname, '../../uploads');
+    const filePath = path.join(uploadsDir, `${type}s`, filename);
+
+    // Delete main file
+    const fileDeleted = await deleteFile(filePath);
+
+    // Try to delete thumbnail if it exists
+    const thumbnailFilename = `thumb-${filename.replace(path.extname(filename), path.extname(filename))}`;
+    await deleteThumbnail(thumbnailFilename);
+
+    if (!fileDeleted) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          message: 'File not found',
+          code: 'FILE_NOT_FOUND',
+        },
+      } as ErrorResponse);
+    }
+
+    res.json({
+      success: true,
+      message: 'File deleted successfully',
+      data: {
+        filename: filename,
+      },
+    });
+  } catch (error) {
+    throw error;
+  }
+});
 
 /**
  * Get upload statistics (optional, for future use)

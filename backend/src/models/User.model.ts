@@ -13,6 +13,7 @@ export interface UserData {
   password_hash: string;
   bio?: string;
   avatar_url?: string;
+  is_active?: boolean;
   created_at?: Date;
   updated_at?: Date;
 }

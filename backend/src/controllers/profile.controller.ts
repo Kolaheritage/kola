@@ -37,7 +37,7 @@ interface ErrorResponse {
  * @access Private
  */
 const getProfile = asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as unknown as AuthenticatedRequest;
 
   // Load user from database using ID from token
   const user = await User.findById(authReq.user.id);
@@ -72,7 +72,7 @@ const getProfile = asyncHandler(async (req: Request, res: Response) => {
 const updateProfile = asyncHandler(
   async (req: Request<{}, {}, UpdateProfileRequestBody>, res: Response) => {
     const { username, bio, avatar_url } = req.body;
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as unknown as AuthenticatedRequest;
 
     // Build update object with only allowed fields
     const allowedUpdates: UpdateUserData = {};

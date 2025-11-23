@@ -82,7 +82,7 @@ const createContent = asyncHandler(
   async (req: Request<{}, {}, CreateContentRequestBody>, res: Response) => {
     const { title, description, category_id, media_url, thumbnail_url, tags, status } = req.body;
 
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as unknown as AuthenticatedRequest;
 
     // Verify category exists
     const category = await Category.findById(category_id);
@@ -207,7 +207,7 @@ const getAllContent = asyncHandler(
  */
 const getContentById = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
   const { id } = req.params;
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as unknown as AuthenticatedRequest;
 
   const content = await Content.findById(id);
 
@@ -271,7 +271,7 @@ const updateContent = asyncHandler(
     const { id } = req.params;
     const { title, description, category_id, media_url, thumbnail_url, tags, status } = req.body;
 
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as unknown as AuthenticatedRequest;
 
     // Check if content exists and belongs to user
     const existingContent = await Content.findById(id);
@@ -354,7 +354,7 @@ const updateContent = asyncHandler(
  */
 const deleteContent = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
   const { id } = req.params;
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as unknown as AuthenticatedRequest;
 
   // Check if content exists and belongs to user
   const existingContent = await Content.findById(id);
@@ -400,7 +400,7 @@ const deleteContent = asyncHandler(async (req: Request<{ id: string }>, res: Res
 const getMyContent = asyncHandler(
   async (req: Request<{}, {}, {}, ContentQueryParams>, res: Response) => {
     const { limit = '20', offset = '0', status, sort = 'recent' } = req.query;
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as unknown as AuthenticatedRequest;
 
     const filters: any = {
       user_id: authReq.user.id,
@@ -436,59 +436,57 @@ const getMyContent = asyncHandler(
  * @access Public
  * HER-23: Get Content by Category Endpoint
  */
-const getContentByCategory = asyncHandler(
-  async (req: Request<{ categoryId: string }, {}, {}, ContentQueryParams>, res: Response) => {
-    const { categoryId } = req.params;
-    const { limit = '20', offset = '0', sort = 'recent', status = 'published' } = req.query;
+const getContentByCategory = asyncHandler(async (req: Request, res: Response) => {
+  const { categoryId } = req.params as { categoryId: string };
+  const { limit = '20', offset = '0', sort = 'recent', status = 'published' } = req.query;
 
-    // Verify category exists
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: 'Category not found',
-          code: 'CATEGORY_NOT_FOUND',
-        },
-      } as ErrorResponse);
-    }
-
-    // Build filters
-    const filters = {
-      category_id: categoryId,
-      status: status as ContentStatus,
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      sort: sort as ContentSort,
-    };
-
-    // Get content and count
-    const content = await Content.findAll(filters);
-    const total = await Content.count({ category_id: categoryId, status: status as ContentStatus });
-
-    res.json({
-      success: true,
-      data: {
-        category: {
-          id: category.id,
-          name: category.name,
-          slug: category.slug,
-          icon: category.icon,
-          description: category.description,
-        },
-        content,
-        pagination: {
-          total,
-          limit: filters.limit,
-          offset: filters.offset,
-          page: Math.floor(filters.offset / filters.limit) + 1,
-          totalPages: Math.ceil(total / filters.limit),
-          hasMore: filters.offset + content.length < total,
-        },
+  // Verify category exists
+  const category = await Category.findById(categoryId);
+  if (!category) {
+    return res.status(404).json({
+      success: false,
+      error: {
+        message: 'Category not found',
+        code: 'CATEGORY_NOT_FOUND',
       },
-    });
+    } as ErrorResponse);
   }
-);
+
+  // Build filters
+  const filters = {
+    category_id: categoryId,
+    status: status as ContentStatus,
+    limit: parseInt(String(limit)),
+    offset: parseInt(String(offset)),
+    sort: sort as ContentSort,
+  };
+
+  // Get content and count
+  const content = await Content.findAll(filters);
+  const total = await Content.count({ category_id: categoryId, status: status as ContentStatus });
+
+  res.json({
+    success: true,
+    data: {
+      category: {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        icon: category.icon,
+        description: category.description,
+      },
+      content,
+      pagination: {
+        total,
+        limit: filters.limit,
+        offset: filters.offset,
+        page: Math.floor(filters.offset / filters.limit) + 1,
+        totalPages: Math.ceil(total / filters.limit),
+        hasMore: filters.offset + content.length < total,
+      },
+    },
+  });
+});
 
 /**
  * Get random content for home page

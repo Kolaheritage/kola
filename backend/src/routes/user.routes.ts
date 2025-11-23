@@ -35,7 +35,7 @@ router.get(
     res.json({
       success: true,
       data: {
-        user: req.user,
+        user: (req as any).user,
       },
     });
   })

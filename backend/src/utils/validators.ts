@@ -1,10 +1,11 @@
-import { body, ValidationChain } from 'express-validator';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { body } = require('express-validator');
 
 /**
  * Validation rules for various endpoints
  */
 
-const registerValidation: ValidationChain[] = [
+const registerValidation: any[] = [
   body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
   body('username')
     .trim()
@@ -19,12 +20,12 @@ const registerValidation: ValidationChain[] = [
     .withMessage('Password must contain at least one number'),
 ];
 
-const loginValidation: ValidationChain[] = [
+const loginValidation: any[] = [
   body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
-const contentValidation: ValidationChain[] = [
+const contentValidation: any[] = [
   body('title')
     .trim()
     .notEmpty()
@@ -63,7 +64,7 @@ const contentValidation: ValidationChain[] = [
     .withMessage('Status must be one of: draft, published, archived'),
 ];
 
-const profileUpdateValidation: ValidationChain[] = [
+const profileUpdateValidation: any[] = [
   body('username')
     .optional()
     .trim()

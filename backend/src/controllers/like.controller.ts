@@ -33,7 +33,7 @@ interface ErrorResponse {
  */
 const toggleLike = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
   const { id: contentId } = req.params;
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as unknown as AuthenticatedRequest;
   const userId = authReq.user.id;
 
   // Check if content exists
@@ -69,7 +69,7 @@ const toggleLike = asyncHandler(async (req: Request<{ id: string }>, res: Respon
  */
 const checkLikeStatus = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
   const { id: contentId } = req.params;
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as unknown as AuthenticatedRequest;
   const userId = authReq.user.id;
 
   // Check if content exists
@@ -134,7 +134,7 @@ const getContentLikes = asyncHandler(async (req: Request<{ id: string }>, res: R
  * @access Private (requires authentication)
  */
 const getUserLikes = asyncHandler(async (req: Request, res: Response) => {
-  const authReq = req as AuthenticatedRequest;
+  const authReq = req as unknown as AuthenticatedRequest;
   const userId = authReq.user.id;
 
   const likes = await Like.findByUser(userId);

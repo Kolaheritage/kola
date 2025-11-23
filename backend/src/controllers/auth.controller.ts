@@ -86,7 +86,7 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginRequestBody>, res: R
 
   // Generate JWT token
   const token = generateToken({
-    userId: user.id!,
+    id: user.id!,
     email: user.email,
   });
 
@@ -139,7 +139,7 @@ const register = asyncHandler(async (req: Request<{}, {}, RegisterRequestBody>, 
 
   // Generate JWT token
   const token = generateToken({
-    userId: user.id,
+    id: user.id,
     email: user.email,
   });
 
