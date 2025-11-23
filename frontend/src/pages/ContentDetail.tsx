@@ -183,6 +183,26 @@ const ContentDetail: React.FC = () => {
   }, [contentId]);
 
   /**
+   * Fetch like status for authenticated users
+   */
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      if (!contentId || !isAuthenticated) return;
+
+      try {
+        const response: any = await apiService.checkLikeStatus(contentId);
+        const data = response.data || response;
+        setLiked(data.liked || false);
+      } catch (err) {
+        // Silently fail - user might not have liked yet
+        console.error('Error checking like status:', err);
+      }
+    };
+
+    fetchLikeStatus();
+  }, [contentId, isAuthenticated]);
+
+  /**
    * Fetch comments
    */
   useEffect(() => {
@@ -246,11 +266,21 @@ const ContentDetail: React.FC = () => {
 
     setLikeLoading(true);
 
+    // Optimistic update
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setLikeCount(prev => wasLiked ? prev - 1 : prev + 1);
+
     try {
-      await apiService.likeContent(contentId!);
-      setLiked(!liked);
-      setLikeCount(prev => liked ? prev - 1 : prev + 1);
+      const response: any = await apiService.likeContent(contentId!);
+      const data = response.data || response;
+      // Use server response to ensure consistency
+      setLiked(data.liked);
+      setLikeCount(data.likeCount);
     } catch (err) {
+      // Revert optimistic update on error
+      setLiked(wasLiked);
+      setLikeCount(prev => wasLiked ? prev + 1 : prev - 1);
       console.error('Error toggling like:', err);
     } finally {
       setLikeLoading(false);

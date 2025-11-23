@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth';
+import { authenticate, optionalAuthenticate } from '../middleware/auth';
 import * as contentController from '../controllers/content.controller';
+import * as likeController from '../controllers/like.controller';
 import validate from '../middleware/validate';
 import { contentValidation } from '../utils/validators';
 
@@ -85,5 +86,31 @@ router.put(
  * @access  Private (requires authentication and ownership)
  */
 router.delete('/:id', authenticate, contentController.deleteContent);
+
+/**
+ * Like Routes
+ * HER-42: Like/Unlike Content
+ */
+
+/**
+ * @route   POST /api/content/:id/like
+ * @desc    Toggle like on content (like if not liked, unlike if liked)
+ * @access  Private (requires authentication)
+ */
+router.post('/:id/like', authenticate, likeController.toggleLike);
+
+/**
+ * @route   GET /api/content/:id/like
+ * @desc    Check if current user has liked the content
+ * @access  Private (requires authentication)
+ */
+router.get('/:id/like', authenticate, likeController.checkLikeStatus);
+
+/**
+ * @route   GET /api/content/:id/likes
+ * @desc    Get all users who liked the content
+ * @access  Public
+ */
+router.get('/:id/likes', likeController.getContentLikes);
 
 export default router;

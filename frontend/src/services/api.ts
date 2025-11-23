@@ -128,6 +128,7 @@ const apiService = {
   updateContent: (id: string, data: Partial<ContentData>) => api.put(`/content/${id}`, data),
   deleteContent: (id: string) => api.delete(`/content/${id}`),
   likeContent: (id: string) => api.post(`/content/${id}/like`),
+  checkLikeStatus: (id: string) => api.get(`/content/${id}/like`),
   searchContent: (query: string) => api.get('/content/search', { params: { q: query } }),
 
   // Categories
