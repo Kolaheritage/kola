@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import apiService from '../services/api';
 import ContentCard from '../components/ContentCard';
+import VideoPlayer from '../components/VideoPlayer';
 import './ContentDetail.css';
 
 /**
@@ -72,8 +73,6 @@ const ContentDetail: React.FC = () => {
 
   // Media state
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const mediaContainerRef = useRef<HTMLDivElement>(null);
 
   // Like state
@@ -322,21 +321,6 @@ const ContentDetail: React.FC = () => {
   };
 
   /**
-   * Handle video play/pause
-   */
-  const togglePlayPause = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  /**
    * Handle share
    */
   const handleShare = async (platform?: string) => {
@@ -459,39 +443,17 @@ const ContentDetail: React.FC = () => {
           {/* Left column - Media and details */}
           <div className="content-primary">
             {/* Media player/viewer */}
-            <div
-              className={`media-container ${isFullscreen ? 'fullscreen' : ''}`}
-              ref={mediaContainerRef}
-            >
-              {isVideo() ? (
-                <div className="video-player">
-                  <video
-                    ref={videoRef}
-                    src={content.media_url}
-                    poster={content.thumbnail_url}
-                    controls
-                    onClick={togglePlayPause}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    className="video-element"
-                  />
-                  <button
-                    className="fullscreen-btn"
-                    onClick={toggleFullscreen}
-                    title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                  >
-                    {isFullscreen ? (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              ) : (
+            {isVideo() ? (
+              <VideoPlayer
+                src={content.media_url!}
+                poster={content.thumbnail_url}
+                title={content.title}
+              />
+            ) : (
+              <div
+                className={`media-container ${isFullscreen ? 'fullscreen' : ''}`}
+                ref={mediaContainerRef}
+              >
                 <div className="image-viewer">
                   <img
                     src={content.media_url || content.thumbnail_url}
@@ -515,8 +477,8 @@ const ContentDetail: React.FC = () => {
                     )}
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Content metadata */}
             <div className="content-info">
