@@ -85,7 +85,7 @@ docker-compose up -d
 
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
-- **Database**: localhost:5432
+- **Database**: localhost:5433
 
 ### 5. Check Service Health
 
@@ -184,7 +184,7 @@ docker exec -i heritage_db psql -U heritage_user -d heritage_db < backup.sql
 
 ### Port Already in Use
 
-If ports 3000, 5000, or 5432 are already in use:
+If ports 3000, 5000, or 5433 are already in use:
 
 1. Stop the conflicting service, or
 2. Change the port in `.env` file:
@@ -276,7 +276,7 @@ See `.env.example` for all available configuration options.
 
 - `BACKEND_PORT`: Backend port (default: 5000)
 - `FRONTEND_PORT`: Frontend port (default: 3000)
-- `DB_PORT`: Database port (default: 5432)
+- `DB_PORT`: Database port (default: 5433)
 
 ## Next Steps
 
