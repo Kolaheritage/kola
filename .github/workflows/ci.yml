@@ -157,3 +157,6 @@ jobs:
     name: CI Success
     runs-on: ubuntu-latest
     needs: [frontend, backend, backend-build, docker-build]
+    steps:
+      - name: All checks passed
+        run: echo "All CI checks passed successfully!"
