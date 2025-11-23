@@ -12,6 +12,7 @@ const router: Router = Router();
  * HER-22: Create Content Endpoint
  * HER-23: Get Content by Category Endpoint
  * HER-24: Get Random Content for Home Page
+ * HER-44: Search Functionality
  * Handles content post operations
  */
 
@@ -46,6 +47,15 @@ router.get('/category/:categoryId', contentController.getContentByCategory);
  * @query   limit, offset, sort, status
  */
 router.get('/me', authenticate, contentController.getMyContent);
+
+/**
+ * @route   GET /api/content/search
+ * @desc    Search content by keywords
+ * @access  Public
+ * @query   q (required), status, limit, offset
+ * HER-44: Search Functionality
+ */
+router.get('/search', contentController.searchContent);
 
 /**
  * @route   GET /api/content/:id

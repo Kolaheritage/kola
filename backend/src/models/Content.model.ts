@@ -65,7 +65,98 @@ export interface ContentFilters {
   sort?: ContentSort;
 }
 
+export interface SearchFilters {
+  query: string;
+  status?: ContentStatus;
+  limit?: number;
+  offset?: number;
+}
+
+export interface SearchResult extends ContentWithDetails {
+  rank?: number;
+  headline_title?: string;
+  headline_description?: string;
+}
+
 class Content {
+  /**
+   * Search content using PostgreSQL full-text search
+   * HER-44: Search Functionality
+   * @param {SearchFilters} filters - Search filters including query, status, limit, offset
+   * @returns {Promise<{ results: SearchResult[]; total: number }>} - Search results with count
+   */
+  static async search(filters: SearchFilters): Promise<{ results: SearchResult[]; total: number }> {
+    const { query, status = 'published', limit = 20, offset = 0 } = filters;
+
+    // Sanitize search query for PostgreSQL tsquery
+    const sanitizedQuery = query
+      .trim()
+      .split(/\s+/)
+      .filter(word => word.length > 0)
+      .map(word => word.replace(/[^\w]/g, ''))
+      .filter(word => word.length > 0)
+      .join(' | '); // OR search
+
+    if (!sanitizedQuery) {
+      return { results: [], total: 0 };
+    }
+
+    // Full-text search query with ranking
+    // Searches in title (weight A), description (weight B), and tags (weight C)
+    const searchQuery = `
+      WITH search_results AS (
+        SELECT
+          c.*,
+          u.username, u.avatar_url as user_avatar,
+          cat.name as category_name, cat.slug as category_slug, cat.icon as category_icon,
+          ts_rank(
+            setweight(to_tsvector('english', COALESCE(c.title, '')), 'A') ||
+            setweight(to_tsvector('english', COALESCE(c.description, '')), 'B') ||
+            setweight(to_tsvector('english', COALESCE(array_to_string(c.tags, ' '), '')), 'C'),
+            to_tsquery('english', $1)
+          ) as rank,
+          ts_headline('english', c.title, to_tsquery('english', $1),
+            'StartSel=<mark>, StopSel=</mark>, MaxWords=50, MinWords=10') as headline_title,
+          ts_headline('english', COALESCE(c.description, ''), to_tsquery('english', $1),
+            'StartSel=<mark>, StopSel=</mark>, MaxWords=50, MinWords=10') as headline_description
+        FROM content c
+        LEFT JOIN users u ON c.user_id = u.id
+        LEFT JOIN categories cat ON c.category_id = cat.id
+        WHERE c.status = $2
+          AND (
+            to_tsvector('english', COALESCE(c.title, '')) ||
+            to_tsvector('english', COALESCE(c.description, '')) ||
+            to_tsvector('english', COALESCE(array_to_string(c.tags, ' '), ''))
+          ) @@ to_tsquery('english', $1)
+      )
+      SELECT * FROM search_results
+      ORDER BY rank DESC, created_at DESC
+      LIMIT $3 OFFSET $4
+    `;
+
+    // Count query
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM content c
+      WHERE c.status = $2
+        AND (
+          to_tsvector('english', COALESCE(c.title, '')) ||
+          to_tsvector('english', COALESCE(c.description, '')) ||
+          to_tsvector('english', COALESCE(array_to_string(c.tags, ' '), ''))
+        ) @@ to_tsquery('english', $1)
+    `;
+
+    const [resultsResult, countResult] = await Promise.all([
+      db.query(searchQuery, [sanitizedQuery, status, limit, offset]),
+      db.query(countQuery, [sanitizedQuery, status])
+    ]);
+
+    return {
+      results: resultsResult.rows,
+      total: parseInt(countResult.rows[0]?.total || '0')
+    };
+  }
+
   /**
    * Find all content (with optional filters)
    * @param {Object} filters - Optional filters (category_id, user_id, status, limit, offset, sort)

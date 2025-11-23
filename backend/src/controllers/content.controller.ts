@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Content, { ContentData, CreateContentData, UpdateContentData, ContentStatus, ContentSort } from '../models/Content.model';
+import Content, { ContentData, CreateContentData, UpdateContentData, ContentStatus, ContentSort, SearchFilters } from '../models/Content.model';
 import Category from '../models/Category.model';
 import View from '../models/View.model';
 import asyncHandler from '../utils/asyncHandler';
@@ -48,6 +48,13 @@ interface ContentQueryParams {
   offset?: string;
   sort?: ContentSort;
   tags?: string | string[];
+}
+
+interface SearchQueryParams {
+  q?: string;
+  status?: ContentStatus;
+  limit?: string;
+  offset?: string;
 }
 
 interface ErrorResponse {
@@ -579,6 +586,64 @@ const getRandomContent = asyncHandler(async (req: Request<{}, {}, {}, { category
   });
 });
 
+/**
+ * Search content
+ * GET /api/content/search?q=keyword
+ * @route GET /api/content/search
+ * @access Public
+ * HER-44: Search Functionality
+ */
+const searchContent = asyncHandler(async (req: Request<{}, {}, {}, SearchQueryParams>, res: Response) => {
+  const { q, status = 'published', limit = '20', offset = '0' } = req.query;
+
+  // Validate search query
+  if (!q || q.trim().length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: 'Search query is required',
+        code: 'SEARCH_QUERY_REQUIRED'
+      }
+    } as ErrorResponse);
+  }
+
+  // Minimum search query length
+  if (q.trim().length < 2) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: 'Search query must be at least 2 characters',
+        code: 'SEARCH_QUERY_TOO_SHORT'
+      }
+    } as ErrorResponse);
+  }
+
+  const searchFilters: SearchFilters = {
+    query: q.trim(),
+    status: status as ContentStatus,
+    limit: parseInt(limit),
+    offset: parseInt(offset)
+  };
+
+  const { results, total } = await Content.search(searchFilters);
+
+  res.json({
+    success: true,
+    data: {
+      query: q.trim(),
+      content: results,
+      pagination: {
+        total,
+        limit: searchFilters.limit,
+        offset: searchFilters.offset,
+        page: Math.floor(searchFilters.offset! / searchFilters.limit!) + 1,
+        totalPages: Math.ceil(total / searchFilters.limit!),
+        hasMore: searchFilters.offset! + results.length < total
+      }
+    }
+  });
+});
+
 export {
   createContent,
   getAllContent,
@@ -587,5 +652,6 @@ export {
   deleteContent,
   getMyContent,
   getContentByCategory,
-  getRandomContent
+  getRandomContent,
+  searchContent
 };

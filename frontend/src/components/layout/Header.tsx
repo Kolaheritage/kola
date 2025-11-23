@@ -1,20 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 
 /**
  * Header Component
  * HER-33: Navigation Header Component
- * Main navigation header with authentication, mobile menu, and sticky behavior
+ * HER-44: Search Functionality
+ * Main navigation header with authentication, mobile menu, search, and sticky behavior
  */
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchExpanded, setSearchExpanded] = useState<boolean>(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Handle scroll for sticky header effects
   useEffect(() => {
@@ -26,11 +31,14 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close dropdown and search when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setUserDropdownOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchExpanded(false);
       }
     };
 
@@ -38,11 +46,23 @@ const Header: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close mobile menu on route change
+  // Close mobile menu and search on route change
   useEffect(() => {
     setMenuOpen(false);
     setUserDropdownOpen(false);
+    setSearchExpanded(false);
   }, [location]);
+
+  // Handle search form submission
+  const handleSearch = (e: React.FormEvent): void => {
+    e.preventDefault();
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery.length >= 2) {
+      navigate(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+      setSearchQuery('');
+      setSearchExpanded(false);
+    }
+  };
 
   const handleLogout = (): void => {
     logout();
@@ -75,6 +95,41 @@ const Header: React.FC = () => {
           <span className="logo-icon">🏛️</span>
           <span className="logo-text">Heritage</span>
         </Link>
+
+        {/* Search Bar */}
+        <div className={`search-container ${searchExpanded ? 'expanded' : ''}`} ref={searchRef}>
+          <form onSubmit={handleSearch} className="search-form">
+            <button
+              type="button"
+              className="search-toggle"
+              onClick={() => setSearchExpanded(!searchExpanded)}
+              aria-label="Toggle search"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
+                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search content..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Search content"
+            />
+            <button
+              type="submit"
+              className="search-submit"
+              disabled={searchQuery.trim().length < 2}
+              aria-label="Submit search"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12h14m-7-7 7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </form>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="nav-desktop">
