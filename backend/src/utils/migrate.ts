@@ -1,7 +1,7 @@
-require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
-const { Pool } = require('pg');
+import 'dotenv/config';
+import fs from 'fs';
+import path from 'path';
+import { Pool, PoolClient } from 'pg';
 
 /**
  * Database Migration Runner
@@ -11,7 +11,7 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5433,
+  port: parseInt(process.env.DB_PORT || '5433'),
   user: process.env.DB_USER || 'heritage_user',
   password: process.env.DB_PASSWORD || 'heritage_password',
   database: process.env.DB_NAME || 'heritage_db',
@@ -20,7 +20,7 @@ const pool = new Pool({
 /**
  * Run all migrations in the migrations directory
  */
-async function runMigrations() {
+async function runMigrations(): Promise<void> {
   const migrationsDir = path.join(__dirname, '../../..', 'database', 'migrations');
 
   try {
@@ -57,7 +57,7 @@ async function runMigrations() {
     `);
 
     // Get already executed migrations
-    const { rows: executedMigrations } = await pool.query(
+    const { rows: executedMigrations } = await pool.query<{ filename: string }>(
       'SELECT filename FROM migrations'
     );
     const executedFiles = executedMigrations.map(row => row.filename);
@@ -75,7 +75,7 @@ async function runMigrations() {
       const sql = fs.readFileSync(filePath, 'utf8');
 
       // Execute migration in a transaction
-      const client = await pool.connect();
+      const client: PoolClient = await pool.connect();
       try {
         await client.query('BEGIN');
         await client.query(sql);
@@ -87,7 +87,7 @@ async function runMigrations() {
         console.log(`✅ Completed: ${file}`);
       } catch (error) {
         await client.query('ROLLBACK');
-        console.error(`❌ Error in ${file}:`, error.message);
+        console.error(`❌ Error in ${file}:`, (error as Error).message);
         throw error;
       } finally {
         client.release();
@@ -108,4 +108,4 @@ if (require.main === module) {
   runMigrations();
 }
 
-module.exports = { runMigrations };
+export { runMigrations };

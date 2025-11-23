@@ -219,7 +219,7 @@ frontend/src/
 #### Database Service (docker-compose.yml:5)
 - Image: postgres:15-alpine
 - Container: heritage_db
-- Port: 5432 (configurable)
+- Port: 5433 (configurable)
 - Health check: pg_isready every 10s
 - Persistent volume: postgres_data
 - Auto-initialization: init.sql on first run

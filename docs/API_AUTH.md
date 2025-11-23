@@ -339,7 +339,7 @@ JWT_EXPIRES_IN=7d
 
 # Database
 DB_HOST=database
-DB_PORT=5432
+DB_PORT=5433
 DB_USER=heritage_user
 DB_PASSWORD=heritage_password
 DB_NAME=heritage_db

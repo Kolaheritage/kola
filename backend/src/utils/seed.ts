@@ -1,6 +1,6 @@
-require('dotenv').config();
-const bcrypt = require('bcryptjs');
-const { Pool } = require('pg');
+import 'dotenv/config';
+import bcrypt from 'bcryptjs';
+import { Pool } from 'pg';
 
 /**
  * Database Seed Script
@@ -10,19 +10,33 @@ const { Pool } = require('pg');
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5433,
+  port: parseInt(process.env.DB_PORT || '5433'),
   user: process.env.DB_USER || 'heritage_user',
   password: process.env.DB_PASSWORD || 'heritage_password',
   database: process.env.DB_NAME || 'heritage_db',
 });
 
+interface TestUser {
+  email: string;
+  username: string;
+  password: string;
+  bio: string;
+}
+
+interface Category {
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+}
+
 /**
  * Seed test users
  */
-async function seedUsers() {
+async function seedUsers(): Promise<void> {
   console.log('👤 Seeding test users...');
 
-  const testUsers = [
+  const testUsers: TestUser[] = [
     {
       email: 'test@example.com',
       username: 'testuser',
@@ -58,7 +72,7 @@ async function seedUsers() {
 
       console.log(`  ✅ Created user: ${user.email} (password: ${user.password})`);
     } catch (error) {
-      console.error(`  ❌ Error creating user ${user.email}:`, error.message);
+      console.error(`  ❌ Error creating user ${user.email}:`, (error as Error).message);
     }
   }
 }
@@ -67,10 +81,10 @@ async function seedUsers() {
  * Seed categories
  * HER-20: Categories Seed Data
  */
-async function seedCategories() {
+async function seedCategories(): Promise<void> {
   console.log('📂 Seeding categories...');
 
-  const categories = [
+  const categories: Category[] = [
     {
       name: 'Rituals',
       slug: 'rituals',
@@ -121,7 +135,7 @@ async function seedCategories() {
 
       console.log(`  ✅ Created category: ${category.name} ${category.icon}`);
     } catch (error) {
-      console.error(`  ❌ Error creating category ${category.name}:`, error.message);
+      console.error(`  ❌ Error creating category ${category.name}:`, (error as Error).message);
     }
   }
 }
@@ -129,7 +143,7 @@ async function seedCategories() {
 /**
  * Main seed function
  */
-async function seed() {
+async function seed(): Promise<void> {
   try {
     console.log('🌱 Starting database seeding...');
 
@@ -156,4 +170,4 @@ if (require.main === module) {
   seed();
 }
 
-module.exports = { seed, seedUsers, seedCategories };
+export { seed, seedUsers, seedCategories };
