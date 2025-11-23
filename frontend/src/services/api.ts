@@ -60,7 +60,24 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor - add auth token
+/**
+ * Generate or get session ID for view tracking (HER-43)
+ * This persists across browser sessions to prevent view count inflation
+ */
+const getSessionId = (): string => {
+  const STORAGE_KEY = 'kola_session_id';
+  let sessionId = localStorage.getItem(STORAGE_KEY);
+
+  if (!sessionId) {
+    // Generate a UUID-like session ID
+    sessionId = 'sess_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem(STORAGE_KEY, sessionId);
+  }
+
+  return sessionId;
+};
+
+// Request interceptor - add auth token and session ID
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Check both localStorage and sessionStorage for token
@@ -68,6 +85,12 @@ api.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Add session ID for view tracking (HER-43)
+    if (config.headers) {
+      config.headers['X-Session-ID'] = getSessionId();
+    }
+
     return config;
   },
   (error) => {
@@ -128,6 +151,7 @@ const apiService = {
   updateContent: (id: string, data: Partial<ContentData>) => api.put(`/content/${id}`, data),
   deleteContent: (id: string) => api.delete(`/content/${id}`),
   likeContent: (id: string) => api.post(`/content/${id}/like`),
+  checkLikeStatus: (id: string) => api.get(`/content/${id}/like`),
   searchContent: (query: string) => api.get('/content/search', { params: { q: query } }),
 
   // Categories

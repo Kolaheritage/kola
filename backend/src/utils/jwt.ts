@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 
 /**
  * JWT Utility Functions
@@ -6,7 +6,8 @@ import jwt from 'jsonwebtoken';
  */
 
 interface JWTPayload {
-  userId: string;
+  id: string;
+  userId?: string; // Alias for compatibility
   email: string;
   [key: string]: any;
 }
@@ -24,7 +25,7 @@ const generateToken = (payload: JWTPayload): string => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  return jwt.sign(payload, secret, { expiresIn });
+  return jwt.sign(payload, secret, { expiresIn } as SignOptions);
 };
 
 /**
@@ -54,9 +55,4 @@ const decodeToken = (token: string): JWTPayload | null => {
   return jwt.decode(token) as JWTPayload | null;
 };
 
-export {
-  generateToken,
-  verifyToken,
-  decodeToken,
-  JWTPayload
-};
+export { generateToken, verifyToken, decodeToken, JWTPayload };

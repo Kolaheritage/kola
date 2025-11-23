@@ -20,8 +20,8 @@ router.get('/', (req: Request, res: Response) => {
       users: '/api/users',
       upload: '/api/upload',
       content: '/api/content',
-      categories: '/api/categories'
-    }
+      categories: '/api/categories',
+    },
   });
 });
 

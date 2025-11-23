@@ -12,6 +12,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import CategoryPage from './pages/CategoryPage';
 import ContentDetail from './pages/ContentDetail';
+import SearchResults from './pages/SearchResults';
 import Upload from './pages/Upload';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
@@ -31,6 +32,7 @@ const App: React.FC = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/content/:contentId" element={<ContentDetail />} />
+          <Route path="/search" element={<SearchResults />} />
 
           {/* Protected Routes */}
           <Route

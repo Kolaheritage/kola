@@ -29,7 +29,7 @@ const successResponse = (
   return res.status(statusCode).json({
     success: true,
     message,
-    data
+    data,
   });
 };
 
@@ -41,7 +41,7 @@ const errorResponse = (
 ): Response => {
   const response: any = {
     success: false,
-    error: { message }
+    error: { message },
   };
 
   if (errors) {
@@ -61,12 +61,8 @@ const paginatedResponse = (
     success: true,
     message,
     data,
-    pagination
+    pagination,
   });
 };
 
-export {
-  successResponse,
-  errorResponse,
-  paginatedResponse
-};
+export { successResponse, errorResponse, paginatedResponse };

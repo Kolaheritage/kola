@@ -31,21 +31,13 @@ router.post(
  * @access  Private (requires authentication)
  * @query   type - File type ('image' or 'video')
  */
-router.delete(
-  '/:filename',
-  authenticate,
-  uploadController.deleteUploadedFile
-);
+router.delete('/:filename', authenticate, uploadController.deleteUploadedFile);
 
 /**
  * @route   GET /api/upload/stats
  * @desc    Get upload statistics
  * @access  Private (requires authentication)
  */
-router.get(
-  '/stats',
-  authenticate,
-  uploadController.getUploadStats
-);
+router.get('/stats', authenticate, uploadController.getUploadStats);
 
 export default router;

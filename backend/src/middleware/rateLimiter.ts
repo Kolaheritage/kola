@@ -17,8 +17,8 @@ export const authLimiter = rateLimit({
     success: false,
     error: {
       message: 'Too many login attempts. Please try again later.',
-      code: 'RATE_LIMIT_EXCEEDED'
-    }
+      code: 'RATE_LIMIT_EXCEEDED',
+    },
   },
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
@@ -39,8 +39,8 @@ export const apiLimiter = rateLimit({
     success: false,
     error: {
       message: 'Too many requests. Please try again later.',
-      code: 'RATE_LIMIT_EXCEEDED'
-    }
+      code: 'RATE_LIMIT_EXCEEDED',
+    },
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -57,8 +57,8 @@ export const strictLimiter = rateLimit({
     success: false,
     error: {
       message: 'Too many attempts. Please try again in an hour.',
-      code: 'RATE_LIMIT_EXCEEDED'
-    }
+      code: 'RATE_LIMIT_EXCEEDED',
+    },
   },
   standardHeaders: true,
   legacyHeaders: false,

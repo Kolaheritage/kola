@@ -17,26 +17,14 @@ const router: Router = Router();
  * @desc    Register a new user
  * @access  Public
  */
-router.post(
-  '/register',
-  authLimiter,
-  registerValidation,
-  validate,
-  authController.register
-);
+router.post('/register', authLimiter, registerValidation, validate, authController.register);
 
 /**
  * @route   POST /api/auth/login
  * @desc    Login user and return JWT token
  * @access  Public
  */
-router.post(
-  '/login',
-  authLimiter,
-  loginValidation,
-  validate,
-  authController.login
-);
+router.post('/login', authLimiter, loginValidation, validate, authController.login);
 
 /**
  * @route   POST /api/auth/logout

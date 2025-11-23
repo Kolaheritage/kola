@@ -37,12 +37,14 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
   }
 
   // Database errors
-  if (err.code === '23505') { // Unique violation
+  if (err.code === '23505') {
+    // Unique violation
     statusCode = 409;
     message = 'Resource already exists';
   }
 
-  if (err.code === '23503') { // Foreign key violation
+  if (err.code === '23503') {
+    // Foreign key violation
     statusCode = 400;
     message = 'Referenced resource does not exist';
   }
@@ -54,9 +56,9 @@ const errorHandler = (err: CustomError, req: Request, res: Response, next: NextF
       message,
       ...(process.env.NODE_ENV === 'development' && {
         stack: err.stack,
-        details: err
-      })
-    }
+        details: err,
+      }),
+    },
   });
 };
 

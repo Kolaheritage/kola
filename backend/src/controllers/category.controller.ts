@@ -28,8 +28,8 @@ const getAllCategories = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     data: {
       categories,
-      count: categories.length
-    }
+      count: categories.length,
+    },
   });
 });
 
@@ -49,16 +49,16 @@ const getCategoryById = asyncHandler(async (req: Request<{ id: string }>, res: R
       success: false,
       error: {
         message: 'Category not found',
-        code: 'CATEGORY_NOT_FOUND'
-      }
+        code: 'CATEGORY_NOT_FOUND',
+      },
     } as ErrorResponse);
   }
 
   res.json({
     success: true,
     data: {
-      category
-    }
+      category,
+    },
   });
 });
 
@@ -78,21 +78,17 @@ const getCategoryBySlug = asyncHandler(async (req: Request<{ slug: string }>, re
       success: false,
       error: {
         message: 'Category not found',
-        code: 'CATEGORY_NOT_FOUND'
-      }
+        code: 'CATEGORY_NOT_FOUND',
+      },
     } as ErrorResponse);
   }
 
   res.json({
     success: true,
     data: {
-      category
-    }
+      category,
+    },
   });
 });
 
-export {
-  getAllCategories,
-  getCategoryById,
-  getCategoryBySlug
-};
+export { getAllCategories, getCategoryById, getCategoryBySlug };

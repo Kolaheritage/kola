@@ -14,7 +14,7 @@ const THUMBNAIL_CONFIG = {
   width: 300,
   height: 300,
   fit: 'cover' as const, // Options: 'cover', 'contain', 'fill', 'inside', 'outside'
-  quality: 80
+  quality: 80,
 };
 
 /**
@@ -35,7 +35,7 @@ async function generateImageThumbnail(imagePath: string, filename: string): Prom
     await sharp(imagePath)
       .resize(THUMBNAIL_CONFIG.width, THUMBNAIL_CONFIG.height, {
         fit: THUMBNAIL_CONFIG.fit,
-        position: 'center'
+        position: 'center',
       })
       .jpeg({ quality: THUMBNAIL_CONFIG.quality })
       .toFile(thumbnailPath);
@@ -174,5 +174,5 @@ export {
   generateVideoThumbnail,
   deleteThumbnail,
   deleteFile,
-  THUMBNAIL_CONFIG
+  THUMBNAIL_CONFIG,
 };

@@ -48,9 +48,7 @@ const query = async <T extends QueryResultRow = any>(
 };
 
 // Transaction helper
-const transaction = async <T>(
-  callback: (client: PoolClient) => Promise<T>
-): Promise<T> => {
+const transaction = async <T>(callback: (client: PoolClient) => Promise<T>): Promise<T> => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -65,9 +63,18 @@ const transaction = async <T>(
   }
 };
 
-export {
+// Get a client from the pool for manual transaction handling
+const getClient = async (): Promise<PoolClient> => {
+  return pool.connect();
+};
+
+export { pool, query, transaction, testConnection, getClient };
+
+// Default export for convenient import
+export default {
   pool,
   query,
   transaction,
-  testConnection
+  testConnection,
+  getClient,
 };

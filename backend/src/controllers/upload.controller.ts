@@ -43,8 +43,8 @@ const uploadFile = asyncHandler(async (req: Request, res: Response) => {
       success: false,
       error: {
         message: 'No file uploaded. Please provide a file in the "file" field.',
-        code: 'NO_FILE_UPLOADED'
-      }
+        code: 'NO_FILE_UPLOADED',
+      },
     } as ErrorResponse);
   }
 
@@ -56,8 +56,8 @@ const uploadFile = asyncHandler(async (req: Request, res: Response) => {
       success: false,
       error: {
         message: 'Invalid file type',
-        code: 'INVALID_FILE_TYPE'
-      }
+        code: 'INVALID_FILE_TYPE',
+      },
     } as ErrorResponse);
   }
 
@@ -68,11 +68,7 @@ const uploadFile = asyncHandler(async (req: Request, res: Response) => {
     // Generate thumbnail
     let thumbnailUrl: string | null = null;
     try {
-      const thumbnailFilename = await generateThumbnail(
-        file.path,
-        file.filename,
-        fileType
-      );
+      const thumbnailFilename = await generateThumbnail(file.path, file.filename, fileType);
 
       if (thumbnailFilename) {
         thumbnailUrl = `/uploads/thumbnails/${thumbnailFilename}`;
@@ -92,15 +88,15 @@ const uploadFile = asyncHandler(async (req: Request, res: Response) => {
         size: file.size,
         type: fileType,
         url: fileUrl,
-        thumbnailUrl: thumbnailUrl
-      }
+        thumbnailUrl: thumbnailUrl,
+      },
     };
 
     // Success response
     res.status(201).json({
       success: true,
       message: 'File uploaded successfully',
-      data: responseData
+      data: responseData,
     });
   } catch (error) {
     // If something goes wrong, clean up the uploaded file
@@ -120,17 +116,17 @@ const uploadFile = asyncHandler(async (req: Request, res: Response) => {
  * @route DELETE /api/upload/:filename
  * @access Private (requires authentication)
  */
-const deleteUploadedFile = asyncHandler(async (req: Request<{ filename: string }, {}, {}, DeleteQueryParams>, res: Response) => {
-  const { filename } = req.params;
-  const { type } = req.query; // 'image' or 'video'
+const deleteUploadedFile = asyncHandler(async (req: Request, res: Response) => {
+  const { filename } = req.params as { filename: string };
+  const { type } = req.query as DeleteQueryParams;
 
   if (!filename) {
     return res.status(400).json({
       success: false,
       error: {
         message: 'Filename is required',
-        code: 'FILENAME_REQUIRED'
-      }
+        code: 'FILENAME_REQUIRED',
+      },
     } as ErrorResponse);
   }
 
@@ -139,8 +135,8 @@ const deleteUploadedFile = asyncHandler(async (req: Request<{ filename: string }
       success: false,
       error: {
         message: 'Valid file type is required (image or video)',
-        code: 'INVALID_FILE_TYPE'
-      }
+        code: 'INVALID_FILE_TYPE',
+      },
     } as ErrorResponse);
   }
 
@@ -161,8 +157,8 @@ const deleteUploadedFile = asyncHandler(async (req: Request<{ filename: string }
         success: false,
         error: {
           message: 'File not found',
-          code: 'FILE_NOT_FOUND'
-        }
+          code: 'FILE_NOT_FOUND',
+        },
       } as ErrorResponse);
     }
 
@@ -170,8 +166,8 @@ const deleteUploadedFile = asyncHandler(async (req: Request<{ filename: string }
       success: true,
       message: 'File deleted successfully',
       data: {
-        filename: filename
-      }
+        filename: filename,
+      },
     });
   } catch (error) {
     throw error;
@@ -189,12 +185,15 @@ const getUploadStats = asyncHandler(async (req: Request, res: Response) => {
 
   try {
     // Count files in each directory
-    const imageFiles = fs.readdirSync(path.join(uploadsDir, 'images'))
-      .filter(f => f !== '.gitkeep').length;
-    const videoFiles = fs.readdirSync(path.join(uploadsDir, 'videos'))
-      .filter(f => f !== '.gitkeep').length;
-    const thumbnailFiles = fs.readdirSync(path.join(uploadsDir, 'thumbnails'))
-      .filter(f => f !== '.gitkeep').length;
+    const imageFiles = fs
+      .readdirSync(path.join(uploadsDir, 'images'))
+      .filter((f) => f !== '.gitkeep').length;
+    const videoFiles = fs
+      .readdirSync(path.join(uploadsDir, 'videos'))
+      .filter((f) => f !== '.gitkeep').length;
+    const thumbnailFiles = fs
+      .readdirSync(path.join(uploadsDir, 'thumbnails'))
+      .filter((f) => f !== '.gitkeep').length;
 
     res.json({
       success: true,
@@ -203,17 +202,13 @@ const getUploadStats = asyncHandler(async (req: Request, res: Response) => {
           totalImages: imageFiles,
           totalVideos: videoFiles,
           totalThumbnails: thumbnailFiles,
-          totalFiles: imageFiles + videoFiles
-        }
-      }
+          totalFiles: imageFiles + videoFiles,
+        },
+      },
     });
   } catch (error) {
     throw error;
   }
 });
 
-export {
-  uploadFile,
-  deleteUploadedFile,
-  getUploadStats
-};
+export { uploadFile, deleteUploadedFile, getUploadStats };

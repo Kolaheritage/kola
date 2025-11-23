@@ -24,7 +24,7 @@ const logger = {
     if (process.env.NODE_ENV === 'development') {
       console.debug(`[DEBUG] ${new Date().toISOString()} - ${message}`, meta);
     }
-  }
+  },
 };
 
 export default logger;

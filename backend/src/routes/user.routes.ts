@@ -35,8 +35,8 @@ router.get(
     res.json({
       success: true,
       data: {
-        user: req.user
-      }
+        user: (req as any).user,
+      },
     });
   })
 );
@@ -65,7 +65,8 @@ router.get(
     const { username } = req.params;
 
     // Find user by username (we'll need to add this method to User model)
-    const query = 'SELECT id, email, username, bio, avatar_url, created_at FROM users WHERE username = $1';
+    const query =
+      'SELECT id, email, username, bio, avatar_url, created_at FROM users WHERE username = $1';
     const result = await db.query(query, [username]);
     const user = result.rows[0];
 
@@ -74,16 +75,16 @@ router.get(
         success: false,
         error: {
           message: 'User not found',
-          code: 'USER_NOT_FOUND'
-        }
+          code: 'USER_NOT_FOUND',
+        },
       });
     }
 
     res.json({
       success: true,
       data: {
-        user
-      }
+        user,
+      },
     });
   })
 );

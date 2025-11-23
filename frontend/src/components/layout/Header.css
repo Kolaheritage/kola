@@ -1,7 +1,8 @@
 /**
  * Header Component Styles
  * HER-33: Navigation Header Component
- * Enhanced navigation with sticky behavior, user dropdown, and mobile menu
+ * HER-44: Search Functionality
+ * Enhanced navigation with sticky behavior, user dropdown, search, and mobile menu
  */
 
 /* Header Base */
@@ -65,6 +66,86 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Search Bar */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+  flex: 1;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--bg-secondary, #f3f4f6);
+  border-radius: 2rem;
+  padding: 0.25rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.search-form:focus-within {
+  background: white;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.search-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--text-light, #6b7280);
+  transition: color 0.2s ease;
+}
+
+.search-toggle:hover {
+  color: #667eea;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  color: var(--text-color, #1f2937);
+  outline: none;
+  min-width: 0;
+}
+
+.search-input::placeholder {
+  color: var(--text-light, #9ca3af);
+}
+
+.search-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: white;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-submit:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.search-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Desktop Navigation */
@@ -458,6 +539,38 @@
     display: none;
   }
 
+  /* Mobile search - collapsible */
+  .search-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    max-width: none;
+    padding: 0 1rem 1rem;
+    background: inherit;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+
+  .search-container.expanded {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .search-toggle {
+    display: flex;
+  }
+
+  .search-form {
+    background: white;
+    border: 1px solid var(--border-color, #e5e7eb);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
   .mobile-menu-toggle {
     display: flex;
   }
@@ -480,6 +593,11 @@
 
   .btn-share {
     display: flex !important;
+  }
+
+  /* Search toggle in header actions on mobile */
+  .header-actions .search-toggle-mobile {
+    display: flex;
   }
 }
 
