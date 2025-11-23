@@ -65,9 +65,24 @@ const transaction = async <T>(
   }
 };
 
+// Get a client from the pool for manual transaction handling
+const getClient = async (): Promise<PoolClient> => {
+  return pool.connect();
+};
+
 export {
   pool,
   query,
   transaction,
-  testConnection
+  testConnection,
+  getClient
+};
+
+// Default export for convenient import
+export default {
+  pool,
+  query,
+  transaction,
+  testConnection,
+  getClient
 };

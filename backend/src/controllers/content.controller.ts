@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import Content, { ContentData, CreateContentData, UpdateContentData, ContentStatus, ContentSort } from '../models/Content.model';
 import Category from '../models/Category.model';
+import View from '../models/View.model';
 import asyncHandler from '../utils/asyncHandler';
 import cache from '../utils/cache';
 
 /**
  * Content Controller
  * HER-22: Create Content Endpoint
+ * HER-43: View Counter with session-based deduplication
  * Handles content post CRUD operations
  */
 
@@ -191,9 +193,11 @@ const getAllContent = asyncHandler(async (req: Request<{}, {}, {}, ContentQueryP
  * GET /api/content/:id
  * @route GET /api/content/:id
  * @access Public
+ * @header X-Session-ID - Session ID for anonymous view tracking
  */
 const getContentById = asyncHandler(async (req: Request<{ id: string }>, res: Response) => {
   const { id } = req.params;
+  const authReq = req as AuthenticatedRequest;
 
   const content = await Content.findById(id);
 
@@ -207,18 +211,41 @@ const getContentById = asyncHandler(async (req: Request<{ id: string }>, res: Re
     } as ErrorResponse);
   }
 
-  // Increment view count (HER-23)
+  // Track view with session-based deduplication (HER-43)
+  let viewCounted = false;
   try {
-    await Content.incrementViewCount(id);
+    // Get tracking info
+    const userId = authReq.user?.id || null;
+    const sessionId = req.headers['x-session-id'] as string || req.cookies?.session_id || null;
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] as string || null;
+    const userAgent = req.headers['user-agent'] || null;
+
+    // Only track if we have either user_id or session_id
+    if (userId || sessionId) {
+      const viewResult = await View.recordView({
+        content_id: id,
+        user_id: userId,
+        session_id: sessionId,
+        ip_address: ipAddress,
+        user_agent: userAgent
+      });
+      viewCounted = viewResult.counted;
+
+      // Update content with new view count
+      if (viewCounted) {
+        content.view_count = viewResult.viewCount;
+      }
+    }
   } catch (error) {
-    // Don't fail the request if view count increment fails
-    console.error('Failed to increment view count:', error);
+    // Don't fail the request if view tracking fails
+    console.error('Failed to track view:', error);
   }
 
   res.json({
     success: true,
     data: {
-      content
+      content,
+      viewCounted // Let frontend know if this was a new view
     }
   });
 });
