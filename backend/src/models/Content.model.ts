@@ -92,9 +92,9 @@ class Content {
     const sanitizedQuery = query
       .trim()
       .split(/\s+/)
-      .filter(word => word.length > 0)
-      .map(word => word.replace(/[^\w]/g, ''))
-      .filter(word => word.length > 0)
+      .filter((word) => word.length > 0)
+      .map((word) => word.replace(/[^\w]/g, ''))
+      .filter((word) => word.length > 0)
       .join(' | '); // OR search
 
     if (!sanitizedQuery) {
@@ -148,12 +148,12 @@ class Content {
 
     const [resultsResult, countResult] = await Promise.all([
       db.query(searchQuery, [sanitizedQuery, status, limit, offset]),
-      db.query(countQuery, [sanitizedQuery, status])
+      db.query(countQuery, [sanitizedQuery, status]),
     ]);
 
     return {
       results: resultsResult.rows,
-      total: parseInt(countResult.rows[0]?.total || '0')
+      total: parseInt(countResult.rows[0]?.total || '0'),
     };
   }
 
@@ -247,7 +247,7 @@ class Content {
       media_url,
       thumbnail_url,
       tags,
-      status = 'published'
+      status = 'published',
     } = contentData;
 
     const query = `
@@ -267,7 +267,7 @@ class Content {
       media_url,
       thumbnail_url,
       tags,
-      status
+      status,
     ]);
 
     // Fetch the complete content with joined data
@@ -281,15 +281,26 @@ class Content {
    * @param {Object} contentData - Updated content data
    * @returns {Promise<Object>} - Updated content post
    */
-  static async update(id: string, contentData: UpdateContentData): Promise<ContentWithDetails | null> {
+  static async update(
+    id: string,
+    contentData: UpdateContentData
+  ): Promise<ContentWithDetails | null> {
     const fields: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
 
     // Only update allowed fields
-    const allowedFields = ['title', 'description', 'category_id', 'media_url', 'thumbnail_url', 'tags', 'status'];
+    const allowedFields = [
+      'title',
+      'description',
+      'category_id',
+      'media_url',
+      'thumbnail_url',
+      'tags',
+      'status',
+    ];
 
-    Object.keys(contentData).forEach(key => {
+    Object.keys(contentData).forEach((key) => {
       if (allowedFields.includes(key) && contentData[key] !== undefined) {
         fields.push(`${key} = $${paramCount}`);
         values.push(contentData[key]);
@@ -316,7 +327,7 @@ class Content {
     }
 
     // Fetch the complete content with joined data
-    return await this.findById(result.rows[0].id) || null;
+    return (await this.findById(result.rows[0].id)) || null;
   }
 
   /**
@@ -443,7 +454,10 @@ class Content {
    * @param {string} status - Content status (default: 'published')
    * @returns {Promise<Object>} - Random content item
    */
-  static async getRandomByCategory(categoryId: string, status: ContentStatus = 'published'): Promise<ContentWithDetails | undefined> {
+  static async getRandomByCategory(
+    categoryId: string,
+    status: ContentStatus = 'published'
+  ): Promise<ContentWithDetails | undefined> {
     const query = `
       SELECT
         c.*,
@@ -466,7 +480,9 @@ class Content {
    * @param {string} status - Content status (default: 'published')
    * @returns {Promise<Array>} - Array of random content items (one per category)
    */
-  static async getRandomPerCategory(status: ContentStatus = 'published'): Promise<ContentWithDetails[]> {
+  static async getRandomPerCategory(
+    status: ContentStatus = 'published'
+  ): Promise<ContentWithDetails[]> {
     // Use DISTINCT ON to get one random item per category
     // First get all categories, then get one random item for each
     const query = `

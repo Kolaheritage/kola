@@ -22,11 +22,12 @@ class SimpleCache {
    * @param {any} value - Value to cache
    * @param {number} ttl - Time to live in milliseconds
    */
-  set<T>(key: string, value: T, ttl: number = 300000): void { // Default 5 minutes
+  set<T>(key: string, value: T, ttl: number = 300000): void {
+    // Default 5 minutes
     const expiresAt = Date.now() + ttl;
     this.cache.set(key, {
       value,
-      expiresAt
+      expiresAt,
     });
   }
 

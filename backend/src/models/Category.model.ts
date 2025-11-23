@@ -76,12 +76,15 @@ class Category {
   /**
    * Update category
    */
-  static async update(id: string, categoryData: UpdateCategoryData): Promise<CategoryData | undefined> {
+  static async update(
+    id: string,
+    categoryData: UpdateCategoryData
+  ): Promise<CategoryData | undefined> {
     const fields: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
 
-    Object.keys(categoryData).forEach(key => {
+    Object.keys(categoryData).forEach((key) => {
       fields.push(`${key} = $${paramCount}`);
       values.push(categoryData[key]);
       paramCount++;

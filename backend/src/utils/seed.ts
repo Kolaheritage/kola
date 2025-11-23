@@ -41,20 +41,20 @@ async function seedUsers(): Promise<void> {
       email: 'test@example.com',
       username: 'testuser',
       password: 'Test1234',
-      bio: 'Test user for development'
+      bio: 'Test user for development',
     },
     {
       email: 'admin@example.com',
       username: 'admin',
       password: 'Admin1234',
-      bio: 'Admin user for development'
+      bio: 'Admin user for development',
     },
     {
       email: 'demo@example.com',
       username: 'demouser',
       password: 'Demo1234',
-      bio: 'Demo user for testing'
-    }
+      bio: 'Demo user for testing',
+    },
   ];
 
   for (const user of testUsers) {
@@ -88,39 +88,45 @@ async function seedCategories(): Promise<void> {
     {
       name: 'Rituals',
       slug: 'rituals',
-      description: 'Traditional ceremonies, customs, and sacred practices passed down through generations',
-      icon: '🕯️'
+      description:
+        'Traditional ceremonies, customs, and sacred practices passed down through generations',
+      icon: '🕯️',
     },
     {
       name: 'Dance',
       slug: 'dance',
-      description: 'Traditional and cultural dance forms, movements, and performances that tell our stories',
-      icon: '💃'
+      description:
+        'Traditional and cultural dance forms, movements, and performances that tell our stories',
+      icon: '💃',
     },
     {
       name: 'Music',
       slug: 'music',
-      description: 'Traditional songs, instruments, rhythms, and musical heritage from our cultures',
-      icon: '🎵'
+      description:
+        'Traditional songs, instruments, rhythms, and musical heritage from our cultures',
+      icon: '🎵',
     },
     {
       name: 'Recipes',
       slug: 'recipes',
-      description: 'Traditional cooking methods, family recipes, and culinary heritage from our ancestors',
-      icon: '🍲'
+      description:
+        'Traditional cooking methods, family recipes, and culinary heritage from our ancestors',
+      icon: '🍲',
     },
     {
       name: 'Stories',
       slug: 'stories',
-      description: 'Oral histories, legends, folktales, and narratives that preserve our cultural wisdom',
-      icon: '📖'
+      description:
+        'Oral histories, legends, folktales, and narratives that preserve our cultural wisdom',
+      icon: '📖',
     },
     {
       name: 'Crafts',
       slug: 'crafts',
-      description: 'Traditional artisan skills, handicrafts, and artistic techniques from our heritage',
-      icon: '🎨'
-    }
+      description:
+        'Traditional artisan skills, handicrafts, and artistic techniques from our heritage',
+      icon: '🎨',
+    },
   ];
 
   for (const category of categories) {

@@ -36,8 +36,9 @@ async function runMigrations(): Promise<void> {
     }
 
     // Read all migration files
-    const files = fs.readdirSync(migrationsDir)
-      .filter(file => file.endsWith('.sql'))
+    const files = fs
+      .readdirSync(migrationsDir)
+      .filter((file) => file.endsWith('.sql'))
       .sort(); // Sort to ensure migrations run in order
 
     if (files.length === 0) {
@@ -60,7 +61,7 @@ async function runMigrations(): Promise<void> {
     const { rows: executedMigrations } = await pool.query<{ filename: string }>(
       'SELECT filename FROM migrations'
     );
-    const executedFiles = executedMigrations.map(row => row.filename);
+    const executedFiles = executedMigrations.map((row) => row.filename);
 
     // Run each migration
     for (const file of files) {
@@ -79,10 +80,7 @@ async function runMigrations(): Promise<void> {
       try {
         await client.query('BEGIN');
         await client.query(sql);
-        await client.query(
-          'INSERT INTO migrations (filename) VALUES ($1)',
-          [file]
-        );
+        await client.query('INSERT INTO migrations (filename) VALUES ($1)', [file]);
         await client.query('COMMIT');
         console.log(`✅ Completed: ${file}`);
       } catch (error) {

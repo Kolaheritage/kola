@@ -69,26 +69,14 @@ router.get('/:id', contentController.getContentById);
  * @desc    Create new content post
  * @access  Private (requires authentication)
  */
-router.post(
-  '/',
-  authenticate,
-  contentValidation,
-  validate,
-  contentController.createContent
-);
+router.post('/', authenticate, contentValidation, validate, contentController.createContent);
 
 /**
  * @route   PUT /api/content/:id
  * @desc    Update content post
  * @access  Private (requires authentication and ownership)
  */
-router.put(
-  '/:id',
-  authenticate,
-  contentValidation,
-  validate,
-  contentController.updateContent
-);
+router.put('/:id', authenticate, contentValidation, validate, contentController.updateContent);
 
 /**
  * @route   DELETE /api/content/:id

@@ -13,11 +13,11 @@ const validate = (req: Request, res: Response, next: NextFunction): void => {
       success: false,
       error: {
         message: 'Validation failed',
-        errors: errors.array().map(err => ({
+        errors: errors.array().map((err) => ({
           field: err.type === 'field' ? err.path : undefined,
-          message: err.msg
-        }))
-      }
+          message: err.msg,
+        })),
+      },
     });
     return;
   }

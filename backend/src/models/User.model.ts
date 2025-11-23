@@ -81,7 +81,7 @@ class User {
     const values: any[] = [];
     let paramCount = 1;
 
-    Object.keys(userData).forEach(key => {
+    Object.keys(userData).forEach((key) => {
       fields.push(`${key} = $${paramCount}`);
       values.push(userData[key]);
       paramCount++;

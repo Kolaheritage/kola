@@ -41,7 +41,10 @@ class Like {
    * @param contentId - Content UUID
    * @returns Promise<LikeData | undefined>
    */
-  static async findByUserAndContent(userId: string, contentId: string): Promise<LikeData | undefined> {
+  static async findByUserAndContent(
+    userId: string,
+    contentId: string
+  ): Promise<LikeData | undefined> {
     const query = `
       SELECT * FROM likes
       WHERE user_id = $1 AND content_id = $2
@@ -136,34 +139,30 @@ class Like {
    * @param contentId - Content UUID
    * @returns Promise<{ liked: boolean; likeCount: number }> - Result of toggle operation
    */
-  static async toggle(userId: string, contentId: string): Promise<{ liked: boolean; likeCount: number }> {
+  static async toggle(
+    userId: string,
+    contentId: string
+  ): Promise<{ liked: boolean; likeCount: number }> {
     const existingLike = await this.findByUserAndContent(userId, contentId);
 
     if (existingLike) {
       // Unlike: delete the like and decrement count
       await this.delete(userId, contentId);
-      await db.query(
-        'UPDATE content SET likes = GREATEST(likes - 1, 0) WHERE id = $1',
-        [contentId]
-      );
+      await db.query('UPDATE content SET likes = GREATEST(likes - 1, 0) WHERE id = $1', [
+        contentId,
+      ]);
     } else {
       // Like: create the like and increment count
       await this.create(userId, contentId);
-      await db.query(
-        'UPDATE content SET likes = likes + 1 WHERE id = $1',
-        [contentId]
-      );
+      await db.query('UPDATE content SET likes = likes + 1 WHERE id = $1', [contentId]);
     }
 
     // Get updated like count
-    const countResult = await db.query(
-      'SELECT likes FROM content WHERE id = $1',
-      [contentId]
-    );
+    const countResult = await db.query('SELECT likes FROM content WHERE id = $1', [contentId]);
 
     return {
       liked: !existingLike,
-      likeCount: countResult.rows[0]?.likes || 0
+      likeCount: countResult.rows[0]?.likes || 0,
     };
   }
 }

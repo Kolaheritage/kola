@@ -8,8 +8,8 @@ const notFoundHandler = (req: Request, res: Response, next: NextFunction): void 
   res.status(404).json({
     success: false,
     error: {
-      message: `Route not found: ${req.method} ${req.url}`
-    }
+      message: `Route not found: ${req.method} ${req.url}`,
+    },
   });
 };
 

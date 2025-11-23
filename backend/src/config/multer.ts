@@ -21,10 +21,10 @@ declare global {
 const uploadDirs = {
   images: path.join(__dirname, '../../uploads/images'),
   videos: path.join(__dirname, '../../uploads/videos'),
-  thumbnails: path.join(__dirname, '../../uploads/thumbnails')
+  thumbnails: path.join(__dirname, '../../uploads/thumbnails'),
 };
 
-Object.values(uploadDirs).forEach(dir => {
+Object.values(uploadDirs).forEach((dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
@@ -32,14 +32,14 @@ Object.values(uploadDirs).forEach(dir => {
 
 // File size limits (in bytes)
 const FILE_SIZE_LIMITS: Record<'image' | 'video', number> = {
-  image: 10 * 1024 * 1024,  // 10MB for images
-  video: 100 * 1024 * 1024  // 100MB for videos
+  image: 10 * 1024 * 1024, // 10MB for images
+  video: 100 * 1024 * 1024, // 100MB for videos
 };
 
 // Allowed file types
 const ALLOWED_FILE_TYPES: Record<'image' | 'video', string[]> = {
   image: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'],
-  video: ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm']
+  video: ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm'],
 };
 
 /**
@@ -47,7 +47,11 @@ const ALLOWED_FILE_TYPES: Record<'image' | 'video', string[]> = {
  * Saves files with unique names based on timestamp and random string
  */
 const storage = multer.diskStorage({
-  destination: function (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) {
+  destination: function (
+    req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void
+  ) {
     // Determine destination based on file type
     const isImage = ALLOWED_FILE_TYPES.image.includes(file.mimetype);
     const isVideo = ALLOWED_FILE_TYPES.video.includes(file.mimetype);
@@ -60,15 +64,19 @@ const storage = multer.diskStorage({
       cb(new Error('Invalid file type'), '');
     }
   },
-  filename: function (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) {
+  filename: function (
+    req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, filename: string) => void
+  ) {
     // Generate unique filename: timestamp-randomstring-originalname
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
     const basename = path.basename(file.originalname, ext);
     // Sanitize filename: remove special characters and spaces
     const sanitizedBasename = basename.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
     cb(null, `${sanitizedBasename}-${uniqueSuffix}${ext}`);
-  }
+  },
 });
 
 /**
@@ -103,8 +111,8 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: FILE_SIZE_LIMITS.video // Use max size, we'll validate specifically in controller
-  }
+    fileSize: FILE_SIZE_LIMITS.video, // Use max size, we'll validate specifically in controller
+  },
 });
 
 /**
@@ -130,8 +138,8 @@ const validateFileSize = (req: Request, res: Response, next: NextFunction): void
         message: `File too large. Maximum size for ${fileType}s is ${maxSizeMB}MB`,
         code: 'FILE_TOO_LARGE',
         maxSize: maxSize,
-        fileSize: fileSize
-      }
+        fileSize: fileSize,
+      },
     });
   }
 
@@ -141,7 +149,12 @@ const validateFileSize = (req: Request, res: Response, next: NextFunction): void
 /**
  * Error handler for multer errors
  */
-const handleMulterError = (err: any, req: Request, res: Response, next: NextFunction): void | Response => {
+const handleMulterError = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void | Response => {
   if (err instanceof multer.MulterError) {
     // Multer-specific errors
     if (err.code === 'LIMIT_FILE_SIZE') {
@@ -150,8 +163,8 @@ const handleMulterError = (err: any, req: Request, res: Response, next: NextFunc
         error: {
           message: 'File too large',
           code: 'FILE_TOO_LARGE',
-          maxSize: FILE_SIZE_LIMITS.video
-        }
+          maxSize: FILE_SIZE_LIMITS.video,
+        },
       });
     }
 
@@ -160,8 +173,8 @@ const handleMulterError = (err: any, req: Request, res: Response, next: NextFunc
         success: false,
         error: {
           message: 'Unexpected file field',
-          code: 'UNEXPECTED_FILE_FIELD'
-        }
+          code: 'UNEXPECTED_FILE_FIELD',
+        },
       });
     }
 
@@ -169,8 +182,8 @@ const handleMulterError = (err: any, req: Request, res: Response, next: NextFunc
       success: false,
       error: {
         message: err.message,
-        code: err.code
-      }
+        code: err.code,
+      },
     });
   }
 
@@ -180,8 +193,8 @@ const handleMulterError = (err: any, req: Request, res: Response, next: NextFunc
       success: false,
       error: {
         message: err.message,
-        code: 'INVALID_FILE_TYPE'
-      }
+        code: 'INVALID_FILE_TYPE',
+      },
     });
   }
 
@@ -195,5 +208,5 @@ export {
   handleMulterError,
   ALLOWED_FILE_TYPES,
   FILE_SIZE_LIMITS,
-  uploadDirs
+  uploadDirs,
 };

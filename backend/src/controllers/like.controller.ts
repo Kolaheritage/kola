@@ -43,8 +43,8 @@ const toggleLike = asyncHandler(async (req: Request<{ id: string }>, res: Respon
       success: false,
       error: {
         message: 'Content not found',
-        code: 'CONTENT_NOT_FOUND'
-      }
+        code: 'CONTENT_NOT_FOUND',
+      },
     } as ErrorResponse);
   }
 
@@ -56,8 +56,8 @@ const toggleLike = asyncHandler(async (req: Request<{ id: string }>, res: Respon
     message: result.liked ? 'Content liked' : 'Content unliked',
     data: {
       liked: result.liked,
-      likeCount: result.likeCount
-    }
+      likeCount: result.likeCount,
+    },
   });
 });
 
@@ -79,8 +79,8 @@ const checkLikeStatus = asyncHandler(async (req: Request<{ id: string }>, res: R
       success: false,
       error: {
         message: 'Content not found',
-        code: 'CONTENT_NOT_FOUND'
-      }
+        code: 'CONTENT_NOT_FOUND',
+      },
     } as ErrorResponse);
   }
 
@@ -90,8 +90,8 @@ const checkLikeStatus = asyncHandler(async (req: Request<{ id: string }>, res: R
     success: true,
     data: {
       liked,
-      likeCount: content.likes || 0
-    }
+      likeCount: content.likes || 0,
+    },
   });
 });
 
@@ -111,8 +111,8 @@ const getContentLikes = asyncHandler(async (req: Request<{ id: string }>, res: R
       success: false,
       error: {
         message: 'Content not found',
-        code: 'CONTENT_NOT_FOUND'
-      }
+        code: 'CONTENT_NOT_FOUND',
+      },
     } as ErrorResponse);
   }
 
@@ -122,8 +122,8 @@ const getContentLikes = asyncHandler(async (req: Request<{ id: string }>, res: R
     success: true,
     data: {
       likes,
-      count: likes.length
-    }
+      count: likes.length,
+    },
   });
 });
 
@@ -143,14 +143,9 @@ const getUserLikes = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     data: {
       likes,
-      count: likes.length
-    }
+      count: likes.length,
+    },
   });
 });
 
-export {
-  toggleLike,
-  checkLikeStatus,
-  getContentLikes,
-  getUserLikes
-};
+export { toggleLike, checkLikeStatus, getContentLikes, getUserLikes };

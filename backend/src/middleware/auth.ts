@@ -61,7 +61,11 @@ export const extractToken = (req: Request): string | null => {
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  */
-export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+export const authenticate = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     // Extract token from header
     const token = extractToken(req);
@@ -71,8 +75,8 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         success: false,
         error: {
           message: 'Authentication required. Please provide a valid token.',
-          code: 'NO_TOKEN_PROVIDED'
-        }
+          code: 'NO_TOKEN_PROVIDED',
+        },
       });
       return;
     }
@@ -88,8 +92,8 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
           success: false,
           error: {
             message: 'Token has expired. Please login again.',
-            code: 'TOKEN_EXPIRED'
-          }
+            code: 'TOKEN_EXPIRED',
+          },
         });
         return;
       } else if (error.name === 'JsonWebTokenError') {
@@ -97,8 +101,8 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
           success: false,
           error: {
             message: 'Invalid token. Please login again.',
-            code: 'INVALID_TOKEN'
-          }
+            code: 'INVALID_TOKEN',
+          },
         });
         return;
       } else {
@@ -109,7 +113,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
     // Attach user info to request (from token payload)
     req.user = {
       id: decoded.id,
-      email: decoded.email
+      email: decoded.email,
     };
 
     next();
@@ -119,8 +123,8 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
       success: false,
       error: {
         message: 'Authentication failed. Please try again.',
-        code: 'AUTH_ERROR'
-      }
+        code: 'AUTH_ERROR',
+      },
     });
   }
 };
@@ -132,7 +136,11 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  */
-export const authenticateWithUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+export const authenticateWithUser = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     // Extract token from header
     const token = extractToken(req);
@@ -142,8 +150,8 @@ export const authenticateWithUser = async (req: AuthenticatedRequest, res: Respo
         success: false,
         error: {
           message: 'Authentication required. Please provide a valid token.',
-          code: 'NO_TOKEN_PROVIDED'
-        }
+          code: 'NO_TOKEN_PROVIDED',
+        },
       });
       return;
     }
@@ -158,8 +166,8 @@ export const authenticateWithUser = async (req: AuthenticatedRequest, res: Respo
           success: false,
           error: {
             message: 'Token has expired. Please login again.',
-            code: 'TOKEN_EXPIRED'
-          }
+            code: 'TOKEN_EXPIRED',
+          },
         });
         return;
       } else if (error.name === 'JsonWebTokenError') {
@@ -167,8 +175,8 @@ export const authenticateWithUser = async (req: AuthenticatedRequest, res: Respo
           success: false,
           error: {
             message: 'Invalid token. Please login again.',
-            code: 'INVALID_TOKEN'
-          }
+            code: 'INVALID_TOKEN',
+          },
         });
         return;
       } else {
@@ -184,8 +192,8 @@ export const authenticateWithUser = async (req: AuthenticatedRequest, res: Respo
         success: false,
         error: {
           message: 'User not found. Please login again.',
-          code: 'USER_NOT_FOUND'
-        }
+          code: 'USER_NOT_FOUND',
+        },
       });
       return;
     }
@@ -196,8 +204,8 @@ export const authenticateWithUser = async (req: AuthenticatedRequest, res: Respo
         success: false,
         error: {
           message: 'Account is deactivated.',
-          code: 'ACCOUNT_DEACTIVATED'
-        }
+          code: 'ACCOUNT_DEACTIVATED',
+        },
       });
       return;
     }
@@ -215,8 +223,8 @@ export const authenticateWithUser = async (req: AuthenticatedRequest, res: Respo
       success: false,
       error: {
         message: 'Authentication failed. Please try again.',
-        code: 'AUTH_ERROR'
-      }
+        code: 'AUTH_ERROR',
+      },
     });
   }
 };
@@ -229,7 +237,11 @@ export const authenticateWithUser = async (req: AuthenticatedRequest, res: Respo
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  */
-export const optionalAuthenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+export const optionalAuthenticate = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const token = extractToken(req);
 
@@ -245,7 +257,7 @@ export const optionalAuthenticate = async (req: AuthenticatedRequest, res: Respo
       const decoded = verifyToken(token) as JwtPayload;
       req.user = {
         id: decoded.id,
-        email: decoded.email
+        email: decoded.email,
       };
     } catch (error) {
       // Token is invalid or expired, continue without user

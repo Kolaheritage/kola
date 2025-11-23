@@ -5,10 +5,7 @@ import { body, ValidationChain } from 'express-validator';
  */
 
 const registerValidation: ValidationChain[] = [
-  body('email')
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
+  body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
   body('username')
     .trim()
     .isLength({ min: 3, max: 30 })
@@ -19,17 +16,12 @@ const registerValidation: ValidationChain[] = [
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long')
     .matches(/\d/)
-    .withMessage('Password must contain at least one number')
+    .withMessage('Password must contain at least one number'),
 ];
 
 const loginValidation: ValidationChain[] = [
-  body('email')
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required')
+  body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
+  body('password').notEmpty().withMessage('Password is required'),
 ];
 
 const contentValidation: ValidationChain[] = [
@@ -59,10 +51,7 @@ const contentValidation: ValidationChain[] = [
     .trim()
     .isLength({ max: 500 })
     .withMessage('Thumbnail URL must not exceed 500 characters'),
-  body('tags')
-    .optional()
-    .isArray()
-    .withMessage('Tags must be an array'),
+  body('tags').optional().isArray().withMessage('Tags must be an array'),
   body('tags.*')
     .optional()
     .trim()
@@ -71,7 +60,7 @@ const contentValidation: ValidationChain[] = [
   body('status')
     .optional()
     .isIn(['draft', 'published', 'archived'])
-    .withMessage('Status must be one of: draft, published, archived')
+    .withMessage('Status must be one of: draft, published, archived'),
 ];
 
 const profileUpdateValidation: ValidationChain[] = [
@@ -94,14 +83,7 @@ const profileUpdateValidation: ValidationChain[] = [
     .withMessage('Avatar URL must be a valid URL')
     .isLength({ max: 500 })
     .withMessage('Avatar URL must not exceed 500 characters'),
-  body('email')
-    .not().exists()
-    .withMessage('Email cannot be updated')
+  body('email').not().exists().withMessage('Email cannot be updated'),
 ];
 
-export {
-  registerValidation,
-  loginValidation,
-  contentValidation,
-  profileUpdateValidation
-};
+export { registerValidation, loginValidation, contentValidation, profileUpdateValidation };

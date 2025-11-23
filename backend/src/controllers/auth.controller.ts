@@ -55,8 +55,8 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginRequestBody>, res: R
       success: false,
       error: {
         message: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS'
-      }
+        code: 'INVALID_CREDENTIALS',
+      },
     } as ErrorResponse);
   }
 
@@ -66,8 +66,8 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginRequestBody>, res: R
       success: false,
       error: {
         message: 'Account is deactivated',
-        code: 'ACCOUNT_DEACTIVATED'
-      }
+        code: 'ACCOUNT_DEACTIVATED',
+      },
     } as ErrorResponse);
   }
 
@@ -79,15 +79,15 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginRequestBody>, res: R
       success: false,
       error: {
         message: 'Invalid credentials',
-        code: 'INVALID_CREDENTIALS'
-      }
+        code: 'INVALID_CREDENTIALS',
+      },
     } as ErrorResponse);
   }
 
   // Generate JWT token
   const token = generateToken({
     userId: user.id!,
-    email: user.email
+    email: user.email,
   });
 
   // Remove password_hash from user object
@@ -99,8 +99,8 @@ const login = asyncHandler(async (req: Request<{}, {}, LoginRequestBody>, res: R
     message: 'Login successful',
     data: {
       user: userWithoutPassword,
-      token
-    }
+      token,
+    },
   } as AuthResponse);
 });
 
@@ -121,8 +121,8 @@ const register = asyncHandler(async (req: Request<{}, {}, RegisterRequestBody>, 
       success: false,
       error: {
         message: 'User with this email already exists',
-        code: 'USER_EXISTS'
-      }
+        code: 'USER_EXISTS',
+      },
     } as ErrorResponse);
   }
 
@@ -134,13 +134,13 @@ const register = asyncHandler(async (req: Request<{}, {}, RegisterRequestBody>, 
   const user = await User.create({
     email,
     username,
-    password_hash
+    password_hash,
   });
 
   // Generate JWT token
   const token = generateToken({
     userId: user.id,
-    email: user.email
+    email: user.email,
   });
 
   // Return success response
@@ -149,8 +149,8 @@ const register = asyncHandler(async (req: Request<{}, {}, RegisterRequestBody>, 
     message: 'User registered successfully',
     data: {
       user,
-      token
-    }
+      token,
+    },
   } as AuthResponse);
 });
 
@@ -164,12 +164,8 @@ const register = asyncHandler(async (req: Request<{}, {}, RegisterRequestBody>, 
 const logout = asyncHandler(async (req: Request, res: Response) => {
   res.json({
     success: true,
-    message: 'Logout successful'
+    message: 'Logout successful',
   });
 });
 
-export {
-  login,
-  register,
-  logout
-};
+export { login, register, logout };

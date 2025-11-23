@@ -54,9 +54,4 @@ const decodeToken = (token: string): JWTPayload | null => {
   return jwt.decode(token) as JWTPayload | null;
 };
 
-export {
-  generateToken,
-  verifyToken,
-  decodeToken,
-  JWTPayload
-};
+export { generateToken, verifyToken, decodeToken, JWTPayload };

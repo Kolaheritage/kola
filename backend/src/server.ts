@@ -27,7 +27,7 @@ app.get('/health', (req: Request, res: Response) => {
     status: 'ok',
     message: 'Heritage Platform API is running',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
   });
 });
 

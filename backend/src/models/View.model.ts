@@ -94,13 +94,12 @@ class View {
 
     if (!shouldCount) {
       // Get current view count without incrementing
-      const countResult = await db.query(
-        'SELECT view_count FROM content WHERE id = $1',
-        [content_id]
-      );
+      const countResult = await db.query('SELECT view_count FROM content WHERE id = $1', [
+        content_id,
+      ]);
       return {
         counted: false,
-        viewCount: countResult.rows[0]?.view_count || 0
+        viewCount: countResult.rows[0]?.view_count || 0,
       };
     }
 
@@ -113,35 +112,44 @@ class View {
       // Insert or update the view record
       if (user_id) {
         // For authenticated users, upsert by user_id
-        await client.query(`
+        await client.query(
+          `
           INSERT INTO content_views (content_id, user_id, session_id, ip_address, user_agent, viewed_at)
           VALUES ($1, $2, $3, $4, $5, NOW())
           ON CONFLICT (content_id, COALESCE(user_id::text, session_id))
           DO UPDATE SET viewed_at = NOW(), ip_address = $4, user_agent = $5
-        `, [content_id, user_id, session_id, ip_address, user_agent]);
+        `,
+          [content_id, user_id, session_id, ip_address, user_agent]
+        );
       } else if (session_id) {
         // For anonymous users, upsert by session_id
-        await client.query(`
+        await client.query(
+          `
           INSERT INTO content_views (content_id, user_id, session_id, ip_address, user_agent, viewed_at)
           VALUES ($1, NULL, $2, $3, $4, NOW())
           ON CONFLICT (content_id, COALESCE(user_id::text, session_id))
           DO UPDATE SET viewed_at = NOW(), ip_address = $3, user_agent = $4
-        `, [content_id, session_id, ip_address, user_agent]);
+        `,
+          [content_id, session_id, ip_address, user_agent]
+        );
       }
 
       // Increment the view count
-      const updateResult = await client.query(`
+      const updateResult = await client.query(
+        `
         UPDATE content
         SET view_count = view_count + 1
         WHERE id = $1
         RETURNING view_count
-      `, [content_id]);
+      `,
+        [content_id]
+      );
 
       await client.query('COMMIT');
 
       return {
         counted: true,
-        viewCount: updateResult.rows[0]?.view_count || 0
+        viewCount: updateResult.rows[0]?.view_count || 0,
       };
     } catch (error) {
       await client.query('ROLLBACK');
@@ -172,7 +180,7 @@ class View {
       total_views: parseInt(result.rows[0]?.total_views || '0'),
       unique_viewers: parseInt(result.rows[0]?.unique_viewers || '0'),
       views_today: parseInt(result.rows[0]?.views_today || '0'),
-      views_this_week: parseInt(result.rows[0]?.views_this_week || '0')
+      views_this_week: parseInt(result.rows[0]?.views_this_week || '0'),
     };
   }
 

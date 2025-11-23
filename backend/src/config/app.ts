@@ -33,13 +33,13 @@ const config: AppConfig = {
   corsOptions: {
     origin: process.env.CORS_ORIGIN || '*',
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
   },
 
   // JWT configuration
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
 
   // File upload configuration
@@ -48,8 +48,8 @@ const config: AppConfig = {
     uploadPath: process.env.UPLOAD_PATH || './uploads',
     allowedImageTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
     allowedVideoTypes: ['video/mp4', 'video/webm', 'video/quicktime'],
-    allowedAudioTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg']
-  }
+    allowedAudioTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg'],
+  },
 };
 
 export default config;
