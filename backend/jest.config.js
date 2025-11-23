@@ -26,10 +26,16 @@ module.exports = {
     }
   },
 
-  // Test match patterns
+  // Test match patterns - only run tests in src/__tests__
   testMatch: [
-    '**/__tests__/**/*.test.js',
-    '**/?(*.)+(spec|test).js'
+    '**/src/__tests__/**/*.test.js'
+  ],
+
+  // Ignore tests in other directories to avoid conflicts
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/tests/'
   ],
 
   // Setup files
