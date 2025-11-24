@@ -18,4 +18,17 @@ if (!process.env.DATABASE_URL) {
   process.env.DB_PASSWORD = 'heritage_password';
 }
 
+// Mock sharp module for test environments where it may not be available
+jest.mock('sharp', () => {
+  const mockSharp = jest.fn(() => ({
+    resize: jest.fn().mockReturnThis(),
+    jpeg: jest.fn().mockReturnThis(),
+    png: jest.fn().mockReturnThis(),
+    webp: jest.fn().mockReturnThis(),
+    toFile: jest.fn().mockResolvedValue({ width: 100, height: 100 }),
+    metadata: jest.fn().mockResolvedValue({ width: 100, height: 100, format: 'jpeg' }),
+  }));
+  return mockSharp;
+});
+
 // Global test utilities can be added here

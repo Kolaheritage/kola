@@ -55,4 +55,13 @@ module.exports = {
 
   // Restore mocks between tests
   restoreMocks: true,
+
+  // Run tests serially to avoid port conflicts
+  maxWorkers: 1,
+
+  // Force exit after tests complete (handles open handles)
+  forceExit: true,
+
+  // Detect open handles for debugging
+  detectOpenHandles: false,
 };

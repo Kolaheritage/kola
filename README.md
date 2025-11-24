@@ -4,285 +4,239 @@ A platform for sharing and preserving cultural heritage through visual content (
 
 ## Tech Stack
 
-- **Frontend**: React
+- **Frontend**: React 18 + TypeScript
 - **Backend**: Node.js + Express
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL 15
 - **Development**: Docker + Docker Compose
 
-## Prerequisites
+## Quick Start (Docker)
 
-Before you begin, ensure you have the following installed:
-- [Docker](https://docs.docker.com/get-docker/) (version 20.10 or higher)
-- [Docker Compose](https://docs.docker.com/compose/install/) (version 2.0 or higher)
-- [Git](https://git-scm.com/downloads)
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) (version 20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (version 2.0+)
+
+### Setup
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd kola
+
+# Run setup script
+chmod +x setup.sh
+./setup.sh
+
+# Start all services
+docker-compose up
+```
+
+Or manually:
+```bash
+cp .env.example .env
+docker-compose up
+```
+
+### Access
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:5000 |
+| Health Check | http://localhost:5000/health |
+
+### Docker Commands
+
+```bash
+docker-compose up              # Start all services
+docker-compose up -d           # Start in background
+docker-compose logs -f         # View logs
+docker-compose logs -f backend # View backend logs only
+docker-compose down            # Stop services
+docker-compose down -v         # Stop and remove volumes
+docker-compose up --build      # Rebuild and start
+```
+
+## Local Development (Without Docker)
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 15+
+
+### Backend Setup
+
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Set environment variables
+export DATABASE_URL=postgresql://user:password@localhost:5432/heritage_db
+export JWT_SECRET=your-secret-key
+export NODE_ENV=development
+
+# Run database migrations
+npm run migrate
+
+# Seed test data (optional)
+npm run seed
+
+# Start development server
+npm run dev
+```
+
+### Frontend Setup
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+```
+
+## Testing
+
+### Backend Tests
+
+```bash
+cd backend
+
+npm test                    # Run all tests
+npm test -- --coverage      # Run with coverage
+npm test -- --watch         # Watch mode
+npm run test:watch          # Watch mode (alias)
+```
+
+### Frontend Tests
+
+```bash
+cd frontend
+
+npm test                    # Run all tests
+npm test -- --coverage      # Run with coverage
+npm test -- --watchAll      # Watch mode
+```
+
+## Linting & Formatting
+
+### Backend
+
+```bash
+cd backend
+
+npm run lint                # Check for issues
+npm run lint:fix            # Auto-fix issues
+npm run format              # Format code
+npm run format:check        # Check formatting
+```
+
+### Frontend
+
+```bash
+cd frontend
+
+npm run lint                # Check for issues
+npm run lint:fix            # Auto-fix issues
+```
 
 ## Project Structure
 
 ```
-heritage-platform/
-├── docker-compose.yml          # Docker orchestration
-├── .env.example                # Environment variables template
-├── .gitignore                  # Git ignore rules
-├── README.md                   # This file
-├── backend/                    # Node.js backend
-│   ├── Dockerfile
-│   ├── package.json
+kola/
+├── backend/                 # Node.js REST API
 │   ├── src/
-│   │   ├── server.js
-│   │   ├── routes/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── middleware/
-│   │   └── utils/
-│   └── uploads/               # Local media storage
-├── frontend/                   # React frontend
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── public/
+│   │   ├── controllers/     # Request handlers
+│   │   ├── routes/          # API endpoints
+│   │   ├── models/          # Database models
+│   │   ├── middleware/      # Auth, validation, errors
+│   │   ├── utils/           # Helpers and utilities
+│   │   └── __tests__/       # Test files
+│   └── uploads/             # Media storage
+├── frontend/                # React SPA
 │   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── hooks/
-│       └── services/
-└── database/
-    └── init.sql               # Database initialization
+│       ├── components/      # Reusable UI components
+│       ├── pages/           # Route pages
+│       └── services/        # API client
+├── database/
+│   └── init.sql             # Database initialization
+├── docs/                    # API documentation
+├── docker-compose.yml       # Docker orchestration
+├── setup.sh                 # Setup script
+└── .env.example             # Environment template
 ```
 
-## Quick Start
+## API Endpoints
 
-### 1. Clone the Repository
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/register` | Register user | No |
+| POST | `/api/auth/login` | Login user | No |
+| GET | `/api/users/profile` | Get profile | Yes |
+| PUT | `/api/users/profile` | Update profile | Yes |
+| GET | `/api/categories` | List categories | No |
+| GET | `/api/content/:id` | Get content | No |
+| POST | `/api/content` | Create content | Yes |
+| POST | `/api/upload` | Upload media | Yes |
 
-```bash
-git clone <repository-url>
-cd heritage-platform
-```
+See `docs/API_AUTH.md` for detailed API documentation.
 
-### 2. Set Up Environment Variables
+## Environment Variables
 
-Copy the example environment file and update with your values:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_HOST` | Database host | localhost |
+| `DB_PORT` | Database port | 5432 |
+| `DB_USER` | Database username | heritage_user |
+| `DB_PASSWORD` | Database password | heritage_password |
+| `DB_NAME` | Database name | heritage_db |
+| `JWT_SECRET` | JWT signing key | (required) |
+| `JWT_EXPIRES_IN` | Token expiration | 7d |
+| `PORT` | Backend port | 5000 |
+| `FRONTEND_PORT` | Frontend port | 3000 |
 
-```bash
-cp .env.example .env
-```
+## Documentation
 
-**Important**: Update the `JWT_SECRET` in `.env` with a strong random string for production.
+- `backend/README.md` - Backend API details
+- `frontend/README.md` - Frontend components
+- `docs/API_AUTH.md` - Authentication API
+- `docs/MIDDLEWARE_AUTH.md` - JWT middleware
 
-### 3. Start the Application
-
-Run all services with Docker Compose:
-
-```bash
-docker-compose up
-```
-
-Or run in detached mode (background):
-
-```bash
-docker-compose up -d
-```
-
-### 4. Access the Application
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
-- **Database**: localhost:5433
-
-### 5. Check Service Health
-
-```bash
-# View logs
-docker-compose logs -f
-
-# View specific service logs
-docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs -f database
-
-# Check running containers
-docker-compose ps
-```
-
-## Development Workflow
-
-### Hot Reload
-
-Both frontend and backend support hot-reload:
-- **Backend**: Changes to `.js` files automatically restart the server (via nodemon)
-- **Frontend**: Changes to `.jsx/.js` files automatically refresh the browser
-
-### Stopping Services
-
-```bash
-# Stop all services
-docker-compose down
-
-# Stop and remove volumes (caution: deletes database data)
-docker-compose down -v
-```
-
-### Rebuilding Services
-
-If you change dependencies or Dockerfiles:
-
-```bash
-# Rebuild all services
-docker-compose up --build
-
-# Rebuild specific service
-docker-compose up --build backend
-```
-
-### Accessing Container Shell
-
-```bash
-# Backend container
-docker exec -it heritage_backend sh
-
-# Frontend container
-docker exec -it heritage_frontend sh
-
-# Database container
-docker exec -it heritage_db psql -U heritage_user -d heritage_db
-```
-
-## Database Management
-
-### Access PostgreSQL
-
-```bash
-# Using docker exec
-docker exec -it heritage_db psql -U heritage_user -d heritage_db
-
-# Or using psql from host (if installed)
-psql -h localhost -U heritage_user -d heritage_db
-```
-
-### Run Migrations
-
-```bash
-# From host
-docker exec -it heritage_backend npm run migrate
-
-# From inside container
-docker exec -it heritage_backend sh
-npm run migrate
-```
-
-### Backup Database
-
-```bash
-docker exec heritage_db pg_dump -U heritage_user heritage_db > backup.sql
-```
-
-### Restore Database
-
-```bash
-docker exec -i heritage_db psql -U heritage_user -d heritage_db < backup.sql
-```
-
-## Common Issues & Troubleshooting
+## Troubleshooting
 
 ### Port Already in Use
 
-If ports 3000, 5000, or 5433 are already in use:
-
-1. Stop the conflicting service, or
-2. Change the port in `.env` file:
-   ```
-   FRONTEND_PORT=3001
-   BACKEND_PORT=5001
-   DB_PORT=5433
-   ```
-
-### Node Modules Issues
-
-If you encounter dependency issues:
-
 ```bash
-# Remove node_modules and reinstall
-docker-compose down
-docker-compose up --build
+# Change ports in .env
+BACKEND_PORT=5001
+FRONTEND_PORT=3001
+DB_PORT=5433
 ```
 
 ### Database Connection Issues
 
-1. Check if database is healthy:
-   ```bash
-   docker-compose ps
-   ```
-
-2. Check database logs:
-   ```bash
-   docker-compose logs database
-   ```
-
-3. Verify environment variables in `.env`
-
-### Hot Reload Not Working
-
-If file changes aren't being detected:
-
-1. For Windows/WSL users, ensure environment variables are set:
-   - `CHOKIDAR_USEPOLLING=true`
-   - `WATCHPACK_POLLING=true`
-
-2. Restart the services:
-   ```bash
-   docker-compose restart frontend backend
-   ```
-
-### Permission Issues with Uploads Folder
-
 ```bash
-# Create uploads directory with proper permissions
-mkdir -p backend/uploads
-chmod 755 backend/uploads
+# Check if database is running
+docker-compose ps
+
+# View database logs
+docker-compose logs database
+
+# Access database directly
+docker exec -it heritage_db psql -U heritage_user -d heritage_db
 ```
 
-## Scripts
-
-### Backend Scripts
+### Reset Everything
 
 ```bash
-# Inside backend container
-npm run dev          # Start development server with nodemon
-npm run start        # Start production server
-npm run test         # Run tests
-npm run migrate      # Run database migrations
-npm run seed         # Seed database with initial data
+docker-compose down -v
+docker-compose up --build
 ```
 
-### Frontend Scripts
+## License
 
-```bash
-# Inside frontend container
-npm start            # Start development server
-npm run build        # Create production build
-npm run test         # Run tests
-```
-
-## Environment Variables
-
-See `.env.example` for all available configuration options.
-
-### Required Variables
-
-- `DB_USER`: PostgreSQL username
-- `DB_PASSWORD`: PostgreSQL password
-- `DB_NAME`: Database name
-- `JWT_SECRET`: Secret key for JWT tokens (change in production!)
-
-### Optional Variables
-
-- `BACKEND_PORT`: Backend port (default: 5000)
-- `FRONTEND_PORT`: Frontend port (default: 3000)
-- `DB_PORT`: Database port (default: 5433)
-
-## Next Steps
-
-After setup, proceed with:
-
-1. **HER-3**: Backend project scaffolding
-2. **HER-4**: Frontend project scaffolding
-3. **HER-5**: Database schema design
-4. **HER-6**: Database migrations
+ISC

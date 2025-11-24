@@ -1,135 +1,73 @@
 #!/bin/bash
 
 # Kola Heritage Platform Setup Script
-# This script helps you set up the development environment
+# This script sets up the development environment
 
 set -e
 
-echo "🏛️ Kola Heritage Platform Setup"
-echo "================================"
+echo "========================================"
+echo "  Kola Heritage Platform Setup"
+echo "========================================"
 echo ""
 
 # Check if Docker is installed
-echo "Checking Docker installation..."
+echo "Checking prerequisites..."
 if ! command -v docker &> /dev/null; then
-    echo "❌ Docker is not installed. Please install Docker first."
+    echo "Error: Docker is not installed"
+    echo "Please install Docker: https://docs.docker.com/get-docker/"
     exit 1
 fi
-echo "✅ Docker is installed"
+echo "[OK] Docker installed"
 
 # Check if Docker Compose is installed
-echo "Checking Docker Compose installation..."
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    echo "❌ Docker Compose is not installed. Please install Docker Compose first."
+if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null 2>&1; then
+    echo "Error: Docker Compose is not installed"
+    echo "Please install Docker Compose: https://docs.docker.com/compose/install/"
     exit 1
 fi
-echo "✅ Docker Compose is installed"
+echo "[OK] Docker Compose installed"
+
+# Check if Docker is running
+if ! docker info &> /dev/null 2>&1; then
+    echo "Error: Docker is not running"
+    echo "Please start Docker and try again"
+    exit 1
+fi
+echo "[OK] Docker is running"
+
+echo ""
 
 # Create .env file if it doesn't exist
 if [ ! -f .env ]; then
-    echo ""
     echo "Creating .env file from template..."
     cp .env.example .env
-    echo "✅ .env file created"
-    echo "⚠️  Please update JWT_SECRET in .env for production use"
+    echo "[OK] Created .env file"
+    echo "[!] Remember to update JWT_SECRET for production"
 else
-    echo "✅ .env file already exists"
+    echo "[OK] .env file exists"
 fi
 
-# Create necessary directories
-echo ""
-echo "Creating necessary directories..."
+# Create uploads directory
 mkdir -p backend/uploads
-mkdir -p database
-touch backend/uploads/.gitkeep
-echo "✅ Directories created"
-
-# Create placeholder files if they don't exist
-echo ""
-echo "Setting up project structure..."
-
-# Backend placeholder
-if [ ! -f backend/src/server.js ]; then
-    mkdir -p backend/src
-    cat > backend/src/server.js << 'EOF'
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-app.use(cors());
-app.use(express.json());
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Heritage Platform API is running' });
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Backend server running on port ${PORT}`);
-});
-EOF
-    echo "✅ Backend placeholder created"
-fi
-
-# Frontend placeholder
-if [ ! -f frontend/src/App.js ]; then
-    mkdir -p frontend/src frontend/public
-    cat > frontend/src/index.js << 'EOF'
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
-EOF
-
-    cat > frontend/src/App.js << 'EOF'
-import React from 'react';
-
-function App() {
-  return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>🏛️ Heritage Content Platform</h1>
-      <p>Your Heritage Is Your Content</p>
-      <p>Development environment is ready!</p>
-    </div>
-  );
-}
-
-export default App;
-EOF
-
-    cat > frontend/public/index.html << 'EOF'
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Heritage Platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
-EOF
-    echo "✅ Frontend placeholder created"
-fi
+echo "[OK] Uploads directory ready"
 
 echo ""
-echo "================================"
-echo "✅ Setup complete!"
+echo "========================================"
+echo "  Setup complete!"
+echo "========================================"
 echo ""
-echo "Next steps:"
-echo "1. Review and update .env file if needed"
-echo "2. Run: docker-compose up"
-echo "3. Access frontend at: http://localhost:3000"
-echo "4. Access backend at: http://localhost:5000"
+echo "Quick start:"
 echo ""
-echo "For more information, see README.md"
-echo "================================"
+echo "  docker-compose up"
+echo ""
+echo "Access:"
+echo "  Frontend: http://localhost:3000"
+echo "  Backend:  http://localhost:5000"
+echo "  Health:   http://localhost:5000/health"
+echo ""
+echo "Useful commands:"
+echo "  docker-compose up -d      # Start in background"
+echo "  docker-compose logs -f    # View logs"
+echo "  docker-compose down       # Stop services"
+echo "  docker-compose down -v    # Stop and remove volumes"
+echo ""
