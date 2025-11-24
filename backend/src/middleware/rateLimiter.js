@@ -6,6 +6,9 @@ const rateLimit = require('express-rate-limit');
  * Prevents brute force attacks on authentication endpoints
  */
 
+// Skip rate limiting in test environment
+const isTestEnv = process.env.NODE_ENV === 'test';
+
 /**
  * Rate limiter for authentication endpoints
  * Limits login attempts to prevent brute force attacks
@@ -24,8 +27,8 @@ const authLimiter = rateLimit({
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
   // Skip successful requests from counting against the limit
   skipSuccessfulRequests: true,
-  // Skip failed requests (optional - commented out for now)
-  // skipFailedRequests: false,
+  // Skip rate limiting in test environment
+  skip: () => isTestEnv,
 });
 
 /**
@@ -44,6 +47,7 @@ const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isTestEnv,
 });
 
 /**
@@ -62,6 +66,7 @@ const strictLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isTestEnv,
 });
 
 module.exports = {
