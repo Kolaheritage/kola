@@ -6,260 +6,151 @@ Node.js REST API for the Heritage Content Platform.
 
 - **Runtime**: Node.js 18+
 - **Framework**: Express.js
-- **Database**: PostgreSQL
-- **Authentication**: JWT
+- **Language**: JavaScript/TypeScript
+- **Database**: PostgreSQL 15
+- **Authentication**: JWT (jsonwebtoken)
 - **Validation**: express-validator
-- **File Upload**: Multer
-- **Image Processing**: Sharp
+- **File Upload**: Multer + Sharp
 
 ## Project Structure
 
 ```
 backend/
 ├── src/
-│   ├── config/          # Configuration files
-│   │   ├── app.js       # App configuration
-│   │   └── database.js  # Database connection & helpers
-│   ├── controllers/     # Request handlers
-│   │   └── auth.controller.js
-│   ├── middleware/      # Custom middleware
-│   │   ├── auth.js      # JWT authentication
-│   │   ├── errorHandler.js
-│   │   ├── notFoundHandler.js
-│   │   └── validate.js  # Validation middleware
-│   ├── models/          # Database models
-│   │   └── User.model.js
-│   ├── routes/          # API routes
-│   │   ├── index.js     # Main router
-│   │   └── auth.routes.js
-│   ├── utils/           # Utility functions
-│   │   ├── asyncHandler.js
-│   │   ├── logger.js
-│   │   ├── response.js
-│   │   └── validators.js
-│   └── server.js        # Application entry point
-├── uploads/             # Local media storage
-├── .env                 # Environment variables
-├── Dockerfile
-├── nodemon.json         # Nodemon configuration
-├── package.json
-└── README.md
+│   ├── config/              # App and database configuration
+│   ├── controllers/         # Request handlers
+│   │   ├── auth.controller.js
+│   │   ├── profile.controller.js
+│   │   ├── content.controller.js
+│   │   ├── category.controller.js
+│   │   └── upload.controller.js
+│   ├── routes/              # API route definitions
+│   ├── models/              # Database models
+│   ├── middleware/          # Auth, validation, error handling
+│   ├── utils/               # Helpers (jwt, validators, response)
+│   └── server.js            # Application entry point
+├── uploads/                 # Local media storage
+├── jest.config.js           # Test configuration
+└── package.json
 ```
 
-## Architecture Patterns
+## API Endpoints
 
-### Clean Architecture
-- **Separation of Concerns**: Routes → Controllers → Models
-- **Middleware**: Reusable logic (auth, validation, error handling)
-- **Utilities**: Helper functions for common operations
-- **Configuration**: Centralized app and database config
+### Authentication
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/register` | Register new user | No |
+| POST | `/api/auth/login` | Login user | No |
+| POST | `/api/auth/logout` | Logout user | No |
 
-### Error Handling
-All async errors are caught and passed to the global error handler:
-```javascript
-const asyncHandler = require('./utils/asyncHandler');
+### Users
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/users/profile` | Get current user profile | Yes |
+| PUT | `/api/users/profile` | Update user profile | Yes |
 
-router.get('/route', asyncHandler(async (req, res) => {
-  // Any errors thrown here are automatically caught
-}));
-```
+### Content
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/content/:id` | Get content by ID | No |
+| GET | `/api/content/category/:id` | Get content by category | No |
+| POST | `/api/content` | Create new content | Yes |
+| PUT | `/api/content/:id` | Update content | Yes |
+| DELETE | `/api/content/:id` | Delete content | Yes |
 
-### Response Standardization
-All responses follow a consistent format:
-```javascript
-const { successResponse, errorResponse } = require('./utils/response');
+### Categories
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/categories` | List all categories | No |
+| GET | `/api/categories/:id` | Get category by ID | No |
 
-// Success
-successResponse(res, data, 'User created successfully', 201);
+### Upload
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/upload` | Upload media file | Yes |
 
-// Error
-errorResponse(res, 'Invalid credentials', 401);
-```
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+
-- PostgreSQL (via Docker Compose)
-
-### Installation
+## Development
 
 ```bash
 # Install dependencies
 npm install
 
-# Copy environment variables (if not using Docker)
-cp ../.env.example ../.env
-
-# Run migrations (once database is ready)
-npm run migrate
-```
-
-### Development
-
-```bash
-# Start with hot-reload
+# Run with hot-reload
 npm run dev
-
-# Start without hot-reload
-npm start
 
 # Run tests
 npm test
 
-# Run tests in watch mode
-npm run test:watch
+# Run tests with coverage
+npm test -- --coverage
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
 ```
 
-## API Endpoints
+## Authentication
 
-### Base URL
-`http://localhost:5000`
+Routes are protected using JWT middleware:
 
-### Health Check
-```
-GET /health
-```
+```javascript
+const { authenticate } = require('../middleware/auth');
 
-Response:
-```json
-{
-  "status": "ok",
-  "message": "Heritage Platform API is running",
-  "timestamp": "2024-01-01T12:00:00.000Z",
-  "environment": "development"
-}
+// Lightweight auth (token info only)
+router.get('/profile', authenticate, controller.getProfile);
+
+// Full auth (loads user from database)
+router.get('/me', authenticateWithUser, controller.getMe);
+
+// Optional auth (doesn't fail without token)
+router.get('/content', optionalAuthenticate, controller.list);
 ```
 
-### API Info
-```
-GET /api
-```
+## Response Format
 
-Response:
-```json
+All responses follow a consistent format:
+
+```javascript
+// Success
 {
   "success": true,
-  "message": "Heritage Platform API",
-  "version": "1.0.0",
-  "endpoints": {
-    "health": "/health",
-    "api": "/api"
+  "message": "Operation successful",
+  "data": { ... }
+}
+
+// Error
+{
+  "success": false,
+  "error": {
+    "message": "Error description",
+    "code": "ERROR_CODE"
   }
 }
 ```
 
-### Planned Endpoints
-
-#### Authentication (HER-10, HER-11)
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-
-#### Users (HER-16)
-- `GET /api/users/profile` - Get current user profile
-- `PUT /api/users/profile` - Update user profile
-
-#### Content (HER-22, HER-23)
-- `POST /api/content` - Create content
-- `GET /api/content/:id` - Get content by ID
-- `GET /api/content/category/:categoryId` - Get content by category
-- `PUT /api/content/:id` - Update content
-- `DELETE /api/content/:id` - Delete content
-
-#### Categories (HER-20)
-- `GET /api/categories` - Get all categories
-- `GET /api/categories/:id` - Get category by ID
-
-## Database
-
-### Connection
-Database connection is managed via a connection pool in `src/config/database.js`.
-
-### Query Helper
-```javascript
-const db = require('./config/database');
-
-// Simple query
-const result = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
-
-// Transaction
-await db.transaction(async (client) => {
-  await client.query('INSERT INTO ...');
-  await client.query('UPDATE ...');
-});
-```
-
-## Middleware
-
-### Authentication
-Protect routes with JWT authentication:
-```javascript
-const auth = require('../middleware/auth');
-
-router.get('/protected', auth, controller.method);
-```
-
-The `auth` middleware:
-- Verifies JWT token from `Authorization: Bearer <token>` header
-- Attaches user info to `req.user`
-- Returns 401 if token is invalid or missing
-
-### Validation
-Validate request data:
-```javascript
-const { registerValidation } = require('../utils/validators');
-const validate = require('../middleware/validate');
-
-router.post('/register', registerValidation, validate, controller.register);
-```
-
-### Error Handling
-Global error handler catches all errors:
-- Database errors (unique violations, foreign key violations)
-- JWT errors (invalid, expired)
-- Validation errors
-- Custom errors with status codes
-
 ## Environment Variables
 
-Required:
-- `PORT` - Server port (default: 5000)
-- `DB_HOST` - Database host
-- `DB_PORT` - Database port
-- `DB_USER` - Database user
-- `DB_PASSWORD` - Database password
-- `DB_NAME` - Database name
-- `JWT_SECRET` - JWT signing secret
-
-Optional:
-- `NODE_ENV` - Environment (development/production)
-- `JWT_EXPIRES_IN` - Token expiration (default: 7d)
-- `MAX_FILE_SIZE` - Max upload size (default: 100MB)
-
-## Models
-
-Models use static methods for database operations:
-```javascript
-const User = require('../models/User.model');
-
-// Find user
-const user = await User.findByEmail(email);
-
-// Create user
-const newUser = await User.create({ email, username, password_hash });
-
-// Update user
-const updated = await User.update(userId, { bio: 'New bio' });
-```
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | 5000 |
+| `NODE_ENV` | Environment | development |
+| `DB_HOST` | Database host | database |
+| `DB_PORT` | Database port | 5432 |
+| `DB_USER` | Database user | heritage_user |
+| `DB_PASSWORD` | Database password | heritage_password |
+| `DB_NAME` | Database name | heritage_db |
+| `JWT_SECRET` | JWT signing secret | (required) |
+| `JWT_EXPIRES_IN` | Token expiration | 7d |
 
 ## Testing
+
+Tests are located in `src/__tests__/` and use Jest + Supertest.
 
 ```bash
 # Run all tests
 npm test
-
-# Run with coverage
-npm test -- --coverage
 
 # Run specific test file
 npm test -- auth.controller.test.js
@@ -268,58 +159,26 @@ npm test -- auth.controller.test.js
 npm run test:watch
 ```
 
-Test files should be named `*.test.js` and placed alongside the files they test.
+## Security Features
 
-## Best Practices
+- JWT token authentication
+- Password hashing (bcryptjs)
+- Rate limiting on auth endpoints
+- Input validation (express-validator)
+- SQL injection prevention (parameterized queries)
+- File upload size limits
 
-1. **Always use asyncHandler** for async route handlers
-2. **Validate all inputs** using express-validator
-3. **Use parameterized queries** to prevent SQL injection
-4. **Hash passwords** with bcrypt before storing
-5. **Use transactions** for operations that modify multiple tables
-6. **Log errors** using the logger utility
-7. **Return consistent responses** using response utilities
-8. **Keep controllers thin** - business logic goes in models or services
-9. **Handle errors gracefully** - don't expose internal errors to clients
-10. **Document all endpoints** with comments
+## Database
 
-## Next Steps
+```javascript
+const db = require('./config/database');
 
-1. **HER-6**: Create database migrations
-2. **HER-10**: Implement user registration
-3. **HER-11**: Implement user login
-4. **HER-21**: Implement file upload
-5. **HER-22**: Implement content creation
+// Query
+const result = await db.query('SELECT * FROM users WHERE id = $1', [id]);
 
-## Troubleshooting
-
-### Database Connection Issues
-```bash
-# Check if PostgreSQL is running
-docker-compose ps database
-
-# View database logs
-docker-compose logs database
-
-# Test connection
-docker exec -it heritage_db psql -U heritage_user -d heritage_db
+// Transaction
+await db.transaction(async (client) => {
+  await client.query('INSERT INTO ...');
+  await client.query('UPDATE ...');
+});
 ```
-
-### Port Already in Use
-Change `PORT` in `.env` or stop the conflicting process.
-
-### Module Not Found
-```bash
-# Reinstall dependencies
-rm -rf node_modules package-lock.json
-npm install
-```
-
-## Contributing
-
-1. Follow the existing code structure
-2. Write tests for new features
-3. Keep functions small and focused
-4. Use meaningful variable names
-5. Add JSDoc comments for complex functions
-6. Update this README when adding new features
