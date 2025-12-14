@@ -59,12 +59,19 @@
 **Updated:**
 ```json
 {
+  "type": "module",              // Enable ES modules (required for Vitest)
   "test": "vitest",              // Watch mode
   "test:ui": "vitest --ui",      // Interactive UI
   "test:run": "vitest run",      // Single run
   "test:coverage": "vitest run --coverage"
 }
 ```
+
+### 6. TypeScript Configuration
+
+**Updated tsconfig.json:**
+- Changed `"module": "commonjs"` to `"module": "ES2020"` for ES module support
+- This ensures TypeScript compiles to ES modules compatible with Vitest
 
 ---
 

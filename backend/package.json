@@ -1,6 +1,7 @@
 {
   "name": "heritage-backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "Backend API for Heritage Content Platform",
   "main": "dist/server.js",
   "scripts": {
