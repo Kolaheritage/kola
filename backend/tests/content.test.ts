@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 
 /**
@@ -6,8 +6,34 @@ import request from 'supertest';
  * HER-22: Create Content Endpoint
  */
 
+// Mock the database module to prevent actual connections
+vi.mock('../src/config/database', () => ({
+  default: {
+    query: vi.fn(),
+    testConnection: vi.fn().mockResolvedValue(true),
+    pool: {
+      on: vi.fn(),
+    },
+  },
+  query: vi.fn(),
+  testConnection: vi.fn().mockResolvedValue(true),
+  pool: {
+    on: vi.fn(),
+  },
+}));
+
+// Mock the Content model
+vi.mock('../src/models/Content.model', () => ({
+  default: {
+    findAll: vi.fn(),
+    findById: vi.fn(),
+    count: vi.fn(),
+  },
+}));
+
 // Import after mocks are defined
 const app = await import('../src/server');
+const Content = await import('../src/models/Content.model');
 
 describe('POST /api/content', () => {
   let authToken: string | undefined;
@@ -282,6 +308,22 @@ describe('POST /api/content', () => {
 
 describe('GET /api/content', () => {
   it('should get all published content', async () => {
+    // Mock Content.findAll to return test data
+    const mockContent = [
+      {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: 'Test Content',
+        description: 'Test Description',
+        category_id: '456e7890-e89b-12d3-a456-426614174000',
+        user_id: '789e0123-e89b-12d3-a456-426614174000',
+        status: 'published',
+        created_at: new Date(),
+      },
+    ] as any;
+
+    vi.mocked(Content.default.findAll).mockResolvedValue(mockContent);
+    vi.mocked(Content.default.count).mockResolvedValue(1);
+
     const response = await request(app.default).get('/api/content').expect(200);
 
     expect(response.body.success).toBe(true);
@@ -290,6 +332,10 @@ describe('GET /api/content', () => {
   });
 
   it('should support pagination', async () => {
+    // Mock Content.findAll to return paginated data
+    vi.mocked(Content.default.findAll).mockResolvedValue([] as any);
+    vi.mocked(Content.default.count).mockResolvedValue(10);
+
     const response = await request(app.default).get('/api/content?limit=5&offset=0').expect(200);
 
     expect(response.body.data.pagination).toBeDefined();
@@ -312,6 +358,9 @@ describe('GET /api/content/:id', () => {
   });
 
   it('should return 404 for non-existent content', async () => {
+    // Mock Content.findById to return undefined (not found)
+    vi.mocked(Content.default.findById).mockResolvedValue(undefined);
+
     const response = await request(app.default)
       .get('/api/content/00000000-0000-0000-0000-000000000000')
       .expect(404);

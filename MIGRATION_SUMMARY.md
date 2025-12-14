@@ -43,6 +43,8 @@
 - `jest.clearAllMocks()` → `vi.clearAllMocks()`
 - Added proper TypeScript types
 - Improved ESM imports with top-level await
+- Mocked database connections and model methods to prevent real DB access
+- All tests run without requiring actual database setup
 
 ### 4. Application Code Updates
 
@@ -150,12 +152,32 @@ If you see `Error [ERR_REQUIRE_ESM]` in CI/CD:
 - Clear node_modules and reinstall: `rm -rf node_modules package-lock.json && npm install`
 - Clear CI/CD cache if the error persists
 
-### Tests Failing with 500 Errors
-If tests fail with 500 Internal Server Error:
-- Ensure database connection is mocked properly
+### Tests Failing with 500 Errors or Database Connection Errors
+If tests fail with 500 Internal Server Error or "database does not exist":
+- Ensure database module is mocked: `vi.mock('../src/config/database')`
+- Mock all model methods used in endpoints (e.g., `findAll`, `findById`, `count`)
 - Check that `NODE_ENV=test` is set in vitest.setup.ts
 - Verify rate limiters have `skip: () => process.env.NODE_ENV === 'test'`
 - Ensure server doesn't start in test mode (check server.ts conditional)
+
+**Example Mock Setup:**
+```typescript
+vi.mock('../src/config/database', () => ({
+  default: {
+    query: vi.fn(),
+    testConnection: vi.fn().mockResolvedValue(true),
+    pool: { on: vi.fn() },
+  },
+}));
+
+vi.mock('../src/models/Content.model', () => ({
+  default: {
+    findAll: vi.fn(),
+    findById: vi.fn(),
+    count: vi.fn(),
+  },
+}));
+```
 
 ---
 
