@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { Pool, PoolClient } from 'pg';
 
 /**
@@ -8,6 +10,10 @@ import { Pool, PoolClient } from 'pg';
  * HER-11: User Login Backend
  * Runs SQL migration files in order
  */
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',

@@ -3,12 +3,18 @@ import express, { Request, Response, Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 import config from './config/app';
 import db from './config/database';
 import errorHandler from './middleware/errorHandler';
 import notFoundHandler from './middleware/notFoundHandler';
 import routes from './routes';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app: Application = express();
 
