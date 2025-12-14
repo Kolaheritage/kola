@@ -438,6 +438,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
+    return undefined;
   }, [showSpeedMenu, showVolumeSlider]);
 
   // Progress percentage

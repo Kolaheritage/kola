@@ -207,10 +207,15 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .btn-share svg {
   flex-shrink: 0;
+}
+
+.btn-text-desktop {
+  white-space: nowrap;
 }
 
 .btn-text-mobile {

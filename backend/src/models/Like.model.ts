@@ -2,7 +2,6 @@ import db from '../config/database';
 
 /**
  * Like Model
- * HER-42: Like/Unlike Content
  * Handles database operations for content likes
  */
 

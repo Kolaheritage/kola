@@ -5,7 +5,6 @@ import { Request, Response, NextFunction } from 'express';
 
 /**
  * Multer Configuration for File Uploads
- * HER-21: File Upload Backend Endpoint
  */
 
 // Extend Express Request to include custom properties

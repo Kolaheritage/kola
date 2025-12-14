@@ -21,7 +21,9 @@ const Home: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiService.getCategories();
-      const categoriesData: Category[] = response.data || response;
+      // Handle both possible response structures
+      const data = response.data || response;
+      const categoriesData: Category[] = Array.isArray(data) ? data : (data.categories || []);
       setCategories(categoriesData);
     } catch (err: any) {
       console.error('Failed to load categories:', err);
@@ -46,7 +48,7 @@ const Home: React.FC = () => {
             Collaborate with elders. Everything you post builds a living archive—and your creative legacy.
           </p>
           <div className="hero-actions">
-            <Link to="/upload" className="btn btn-primary btn-large">
+            <Link to="/upload" className="btn btn-accent btn-large">
               Share Your Heritage
             </Link>
             <Link to="/explore" className="btn btn-secondary btn-large">

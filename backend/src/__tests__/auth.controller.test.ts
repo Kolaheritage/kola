@@ -1,30 +1,45 @@
-const request = require('supertest');
-const bcrypt = require('bcryptjs');
-const app = require('../server');
-const User = require('../models/User.model');
-const { generateToken, verifyToken } = require('../utils/jwt');
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import request from 'supertest';
+import bcrypt from 'bcryptjs';
 
 /**
  * Authentication Controller Tests
  * HER-11: User Login Backend
  */
 
-// Mock the User model
-jest.mock('../models/User.model');
-
 // Mock the database module to prevent actual connections
-jest.mock('../config/database', () => ({
-  query: jest.fn(),
-  testConnection: jest.fn().mockResolvedValue(true),
+vi.mock('../config/database', () => ({
+  default: {
+    query: vi.fn(),
+    testConnection: vi.fn().mockResolvedValue(true),
+    pool: {
+      on: vi.fn(),
+    },
+  },
+  query: vi.fn(),
+  testConnection: vi.fn().mockResolvedValue(true),
   pool: {
-    on: jest.fn()
-  }
+    on: vi.fn(),
+  },
 }));
+
+// Mock the User model
+vi.mock('../models/User.model', () => ({
+  default: {
+    findByEmail: vi.fn(),
+    create: vi.fn(),
+  },
+}));
+
+// Import after mocks are defined
+const app = await import('../server');
+const User = await import('../models/User.model');
+const { verifyToken } = await import('../utils/jwt');
 
 describe('Auth Controller - Login', () => {
   // Clear mocks before each test
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('POST /api/auth/login', () => {
@@ -37,18 +52,16 @@ describe('Auth Controller - Login', () => {
         password_hash: await bcrypt.hash('Test1234', 10),
         is_active: true,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       };
 
       // Mock User.findByEmail to return the mock user
-      User.findByEmail.mockResolvedValue(mockUser);
+      vi.mocked(User.default.findByEmail).mockResolvedValue(mockUser);
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -61,14 +74,12 @@ describe('Auth Controller - Login', () => {
 
     it('should return 401 for invalid email', async () => {
       // Mock User.findByEmail to return null (user not found)
-      User.findByEmail.mockResolvedValue(null);
+      vi.mocked(User.default.findByEmail).mockResolvedValue(undefined);
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'nonexistent@example.com',
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        email: 'nonexistent@example.com',
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -82,17 +93,15 @@ describe('Auth Controller - Login', () => {
         email: 'test@example.com',
         username: 'testuser',
         password_hash: await bcrypt.hash('Test1234', 10),
-        is_active: true
+        is_active: true,
       };
 
-      User.findByEmail.mockResolvedValue(mockUser);
+      vi.mocked(User.default.findByEmail).mockResolvedValue(mockUser);
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'WrongPassword'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'WrongPassword',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -105,17 +114,15 @@ describe('Auth Controller - Login', () => {
         email: 'test@example.com',
         username: 'testuser',
         password_hash: await bcrypt.hash('Test1234', 10),
-        is_active: false // Account is deactivated
+        is_active: false, // Account is deactivated
       };
 
-      User.findByEmail.mockResolvedValue(mockUser);
+      vi.mocked(User.default.findByEmail).mockResolvedValue(mockUser);
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -124,11 +131,9 @@ describe('Auth Controller - Login', () => {
     });
 
     it('should return 400 for missing email', async () => {
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -136,11 +141,9 @@ describe('Auth Controller - Login', () => {
     });
 
     it('should return 400 for missing password', async () => {
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'test@example.com'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        email: 'test@example.com',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -148,12 +151,10 @@ describe('Auth Controller - Login', () => {
     });
 
     it('should return 400 for invalid email format', async () => {
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'invalid-email',
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        email: 'invalid-email',
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -165,17 +166,15 @@ describe('Auth Controller - Login', () => {
         email: 'test@example.com',
         username: 'testuser',
         password_hash: await bcrypt.hash('Test1234', 10),
-        is_active: true
+        is_active: true,
       };
 
-      User.findByEmail.mockResolvedValue(mockUser);
+      vi.mocked(User.default.findByEmail).mockResolvedValue(mockUser);
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(200);
       const { token } = response.body.data;
@@ -190,30 +189,28 @@ describe('Auth Controller - Login', () => {
 
 describe('Auth Controller - Register', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('POST /api/auth/register', () => {
     it('should successfully register a new user', async () => {
-      // Mock User.findByEmail to return null (user doesn't exist)
-      User.findByEmail.mockResolvedValue(null);
+      // Mock User.findByEmail to return undefined (user doesn't exist)
+      vi.mocked(User.default.findByEmail).mockResolvedValue(undefined);
 
       // Mock User.create to return the created user
       const mockCreatedUser = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         email: 'newuser@example.com',
         username: 'newuser',
-        created_at: new Date()
+        created_at: new Date(),
       };
-      User.create.mockResolvedValue(mockCreatedUser);
+      vi.mocked(User.default.create).mockResolvedValue(mockCreatedUser);
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          email: 'newuser@example.com',
-          username: 'newuser',
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/register').send({
+        email: 'newuser@example.com',
+        username: 'newuser',
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
@@ -225,18 +222,16 @@ describe('Auth Controller - Register', () => {
 
     it('should return 409 if user already exists', async () => {
       // Mock User.findByEmail to return existing user
-      User.findByEmail.mockResolvedValue({
+      vi.mocked(User.default.findByEmail).mockResolvedValue({
         id: '123',
-        email: 'existing@example.com'
-      });
+        email: 'existing@example.com',
+      } as any);
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          email: 'existing@example.com',
-          username: 'existinguser',
-          password: 'Test1234'
-        });
+      const response = await request(app.default).post('/api/auth/register').send({
+        email: 'existing@example.com',
+        username: 'existinguser',
+        password: 'Test1234',
+      });
 
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
@@ -244,13 +239,11 @@ describe('Auth Controller - Register', () => {
     });
 
     it('should validate password strength', async () => {
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send({
-          email: 'newuser@example.com',
-          username: 'newuser',
-          password: 'weak' // Too short, no number
-        });
+      const response = await request(app.default).post('/api/auth/register').send({
+        email: 'newuser@example.com',
+        username: 'newuser',
+        password: 'weak', // Too short, no number
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);

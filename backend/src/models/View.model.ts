@@ -2,7 +2,6 @@ import db from '../config/database';
 
 /**
  * View Model
- * HER-43: View Counter
  * Handles view tracking with session-based deduplication
  */
 

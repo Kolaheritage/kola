@@ -3,7 +3,6 @@ import db from '../config/database';
 /**
  * Content Model
  * Handles database operations for content posts
- * HER-22: Create Content Endpoint
  */
 
 export type ContentStatus = 'draft' | 'published' | 'archived';
