@@ -133,11 +133,29 @@ npm test:coverage
 
 ## Important Notes
 
-1. **Rate Limiting:** Automatically disabled in test mode via `skip` function
-2. **Server Startup:** Only starts when NOT in test mode to prevent port conflicts
-3. **Test Isolation:** Tests run in separate processes using `pool: 'forks'`
-4. **Coverage Reports:** Generated using V8 provider (faster than Istanbul)
-5. **TypeScript:** Full type safety with proper mocking support
+1. **ES Modules:** Package.json uses `"type": "module"` for native ES module support
+2. **TypeScript Configuration:** Compiles to ES2020 modules for Vitest compatibility
+3. **Rate Limiting:** Automatically disabled in test mode via `skip` function
+4. **Server Startup:** Only starts when NOT in test mode to prevent port conflicts
+5. **Test Isolation:** Tests run in separate processes using `pool: 'forks'`
+6. **Coverage Reports:** Generated using V8 provider (faster than Istanbul)
+7. **TypeScript:** Full type safety with proper mocking support
+
+## Troubleshooting
+
+### CI/CD "ERR_REQUIRE_ESM" Error
+If you see `Error [ERR_REQUIRE_ESM]` in CI/CD:
+- Ensure `"type": "module"` is in package.json
+- Ensure `"module": "ES2020"` is in tsconfig.json
+- Clear node_modules and reinstall: `rm -rf node_modules package-lock.json && npm install`
+- Clear CI/CD cache if the error persists
+
+### Tests Failing with 500 Errors
+If tests fail with 500 Internal Server Error:
+- Ensure database connection is mocked properly
+- Check that `NODE_ENV=test` is set in vitest.setup.ts
+- Verify rate limiters have `skip: () => process.env.NODE_ENV === 'test'`
+- Ensure server doesn't start in test mode (check server.ts conditional)
 
 ---
 
