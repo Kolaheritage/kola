@@ -3,7 +3,6 @@ import db from '../config/database';
 /**
  * User Model
  * Handles database operations for users
- * Will be fully implemented in HER-10
  */
 
 export interface UserData {

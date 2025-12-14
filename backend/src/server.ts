@@ -23,6 +23,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
+  console.log('Health check requested');
   res.json({
     status: 'ok',
     message: 'Heritage Platform API is running',
@@ -45,20 +46,23 @@ const startServer = async (): Promise<void> => {
   try {
     // Test database connection
     await db.testConnection();
-    console.log('✅ Database connected successfully');
+    console.log('Database connected successfully');
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📝 Environment: ${config.env}`);
-      console.log(`🏥 Health check: http://localhost:${PORT}/health`);
-      console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Environment: ${config.env}`);
+      console.log(`Health check: http://localhost:${PORT}/health`);
+      console.log(`API Base URL: http://localhost:${PORT}/api`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', (error as Error).message);
+    console.error('Failed to start server:', (error as Error).message);
     process.exit(1);
   }
 };
 
-startServer();
+// Only start the server if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export default app;

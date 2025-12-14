@@ -162,9 +162,9 @@ async function seed(): Promise<void> {
     // Add more seed functions here as needed
     // await seedContent();
 
-    console.log('🎉 Database seeding completed!');
+    console.log('Database seeding completed!');
   } catch (error) {
-    console.error('❌ Seeding failed:', error);
+    console.error('Seeding failed:', error);
     process.exit(1);
   } finally {
     await pool.end();

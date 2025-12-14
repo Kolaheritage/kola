@@ -160,7 +160,7 @@ const Header: React.FC = () => {
                     strokeLinecap="round"
                   />
                 </svg>
-                <span className="btn-text-desktop">Share Idea Now</span>
+                <span className="btn-text-desktop">Share Idea</span>
                 <span className="btn-text-mobile">Share</span>
               </Link>
 
@@ -266,7 +266,7 @@ const Header: React.FC = () => {
                     strokeLinecap="round"
                   />
                 </svg>
-                <span className="btn-text-desktop">Share Idea Now</span>
+                <span className="btn-text-desktop">Share Idea</span>
                 <span className="btn-text-mobile">Share</span>
               </Link>
               <Link to="/login" className="btn btn-secondary">

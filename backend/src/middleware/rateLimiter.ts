@@ -2,13 +2,13 @@ import rateLimit from 'express-rate-limit';
 
 /**
  * Rate Limiting Middleware
- * HER-11: User Login Backend
  * Prevents brute force attacks on authentication endpoints
  */
 
 /**
  * Rate limiter for authentication endpoints
  * Limits login attempts to prevent brute force attacks
+ * Disabled in test environment
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -22,6 +22,7 @@ export const authLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  skip: () => process.env.NODE_ENV === 'test', // Disable in test mode
   // Skip successful requests from counting against the limit
   skipSuccessfulRequests: true,
   // Skip failed requests (optional - commented out for now)
@@ -31,6 +32,7 @@ export const authLimiter = rateLimit({
 /**
  * General API rate limiter
  * More lenient than auth limiter
+ * Disabled in test environment
  */
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -44,11 +46,13 @@ export const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test', // Disable in test mode
 });
 
 /**
  * Strict rate limiter for sensitive operations
  * Very restrictive for operations like password reset
+ * Disabled in test environment
  */
 export const strictLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
@@ -62,4 +66,5 @@ export const strictLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test', // Disable in test mode
 });

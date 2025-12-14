@@ -71,8 +71,6 @@ const SearchResults: React.FC = () => {
         setLoading(true);
       }
 
-      const offset = loadMore && pagination ? pagination.offset + pagination.limit : 0;
-
       const response = await apiService.searchContent(query);
       const data: SearchResponse = response.data || response;
 
@@ -123,13 +121,6 @@ const SearchResults: React.FC = () => {
   // Back to home
   const handleBackToHome = (): void => {
     navigate('/');
-  };
-
-  // Render highlighted text (for search result snippets)
-  const renderHighlightedText = (text: string | undefined): React.ReactNode => {
-    if (!text) return null;
-    // The backend returns text with <mark>...</mark> tags for highlighting
-    return <span dangerouslySetInnerHTML={{ __html: text }} />;
   };
 
   return (

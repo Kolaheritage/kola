@@ -8,15 +8,6 @@ import { contentValidation } from '../utils/validators';
 const router: Router = Router();
 
 /**
- * Content Routes
- * HER-22: Create Content Endpoint
- * HER-23: Get Content by Category Endpoint
- * HER-24: Get Random Content for Home Page
- * HER-44: Search Functionality
- * Handles content post operations
- */
-
-/**
  * @route   GET /api/content
  * @desc    Get all content posts (with optional filters)
  * @access  Public

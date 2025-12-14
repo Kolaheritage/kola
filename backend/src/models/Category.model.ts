@@ -3,7 +3,6 @@ import db from '../config/database';
 /**
  * Category Model
  * Handles database operations for categories
- * HER-20: Categories Seed Data
  */
 
 export interface CategoryData {

@@ -11,12 +11,19 @@ CREATE TABLE IF NOT EXISTS content_views (
     session_id VARCHAR(255),
     ip_address VARCHAR(45),
     user_agent TEXT,
-    viewed_at TIMESTAMP DEFAULT NOW(),
-
-    -- Each combination should be unique within a time window
-    -- We allow re-counting after 24 hours
-    CONSTRAINT unique_view_per_session UNIQUE (content_id, COALESCE(user_id::text, session_id))
+    viewed_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Create unique constraint using partial indexes
+-- For authenticated users
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_view_user
+    ON content_views(content_id, user_id)
+    WHERE user_id IS NOT NULL;
+
+-- For anonymous users
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_view_session
+    ON content_views(content_id, session_id)
+    WHERE user_id IS NULL AND session_id IS NOT NULL;
 
 -- Create indexes for efficient queries
 CREATE INDEX IF NOT EXISTS idx_content_views_content_id ON content_views(content_id);

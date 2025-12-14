@@ -1,21 +1,24 @@
-const request = require('supertest');
-const app = require('../src/server');
+import { describe, it, expect, beforeAll } from 'vitest';
+import request from 'supertest';
 
 /**
  * Content Endpoint Tests
  * HER-22: Create Content Endpoint
  */
 
+// Import after mocks are defined
+const app = await import('../src/server');
+
 describe('POST /api/content', () => {
-  let authToken;
-  let testUserId;
-  let testCategoryId;
+  let authToken: string | undefined;
+  let testUserId: string | undefined;
+  let testCategoryId: string | undefined;
 
   // Mock data for testing
   const validContentData = {
     title: 'My First Cultural Dance',
     description: 'A traditional dance from my heritage',
-    category_id: null, // Will be set in beforeAll
+    category_id: null as string | null, // Will be set in beforeAll
     media_url: '/uploads/videos/dance-123456789.mp4',
     thumbnail_url: '/uploads/thumbnails/thumb-dance-123456789.jpg',
     tags: ['dance', 'traditional', 'cultural'],
@@ -35,7 +38,7 @@ describe('POST /api/content', () => {
 
   describe('Authentication', () => {
     it('should return 401 if no token is provided', async () => {
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .send(validContentData)
         .expect(401);
@@ -45,7 +48,7 @@ describe('POST /api/content', () => {
     });
 
     it('should return 401 if token is invalid', async () => {
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', 'Bearer invalid-token')
         .send(validContentData)
@@ -61,9 +64,9 @@ describe('POST /api/content', () => {
       if (!authToken) return;
 
       const invalidData = { ...validContentData };
-      delete invalidData.title;
+      delete (invalidData as any).title;
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -78,7 +81,7 @@ describe('POST /api/content', () => {
 
       const invalidData = { ...validContentData, title: 'ab' };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -93,7 +96,7 @@ describe('POST /api/content', () => {
 
       const invalidData = { ...validContentData, title: 'a'.repeat(201) };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -107,9 +110,9 @@ describe('POST /api/content', () => {
       if (!authToken) return;
 
       const invalidData = { ...validContentData };
-      delete invalidData.category_id;
+      delete (invalidData as any).category_id;
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -124,7 +127,7 @@ describe('POST /api/content', () => {
 
       const invalidData = { ...validContentData, category_id: 'invalid-uuid' };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -137,9 +140,9 @@ describe('POST /api/content', () => {
       // Skip if we don't have auth setup
       if (!authToken) return;
 
-      const invalidData = { ...validContentData, tags: 'not-an-array' };
+      const invalidData = { ...validContentData, tags: 'not-an-array' as any };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -154,7 +157,7 @@ describe('POST /api/content', () => {
 
       const invalidData = { ...validContentData, status: 'invalid-status' };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -171,7 +174,7 @@ describe('POST /api/content', () => {
 
       const contentData = { ...validContentData, category_id: testCategoryId };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(contentData)
@@ -197,7 +200,7 @@ describe('POST /api/content', () => {
         category_id: testCategoryId
       };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(minimalData)
@@ -214,7 +217,7 @@ describe('POST /api/content', () => {
 
       const contentData = { ...validContentData, category_id: testCategoryId };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(contentData)
@@ -233,7 +236,7 @@ describe('POST /api/content', () => {
         category_id: '00000000-0000-0000-0000-000000000000' // Non-existent UUID
       };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(invalidData)
@@ -251,7 +254,7 @@ describe('POST /api/content', () => {
 
       const contentData = { ...validContentData, category_id: testCategoryId };
 
-      const response = await request(app)
+      const response = await request(app.default)
         .post('/api/content')
         .set('Authorization', `Bearer ${authToken}`)
         .send(contentData)
@@ -279,7 +282,7 @@ describe('POST /api/content', () => {
 
 describe('GET /api/content', () => {
   it('should get all published content', async () => {
-    const response = await request(app)
+    const response = await request(app.default)
       .get('/api/content')
       .expect(200);
 
@@ -289,7 +292,7 @@ describe('GET /api/content', () => {
   });
 
   it('should support pagination', async () => {
-    const response = await request(app)
+    const response = await request(app.default)
       .get('/api/content?limit=5&offset=0')
       .expect(200);
 
@@ -313,7 +316,7 @@ describe('GET /api/content/:id', () => {
   });
 
   it('should return 404 for non-existent content', async () => {
-    const response = await request(app)
+    const response = await request(app.default)
       .get('/api/content/00000000-0000-0000-0000-000000000000')
       .expect(404);
 
@@ -348,7 +351,7 @@ describe('DELETE /api/content/:id', () => {
 
 describe('GET /api/content/me', () => {
   it('should require authentication', async () => {
-    const response = await request(app)
+    const response = await request(app.default)
       .get('/api/content/me')
       .expect(401);
 

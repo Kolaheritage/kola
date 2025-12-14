@@ -8,8 +8,6 @@ const router: Router = Router();
 
 /**
  * Authentication Routes
- * HER-10: User Registration Backend
- * HER-11: User Login Backend
  */
 
 /**

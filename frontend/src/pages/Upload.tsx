@@ -79,7 +79,8 @@ const Upload: React.FC = () => {
   const loadCategories = async (): Promise<void> => {
     try {
       const response: any = await apiService.getCategories();
-      const categoriesData = response.data || response;
+      const data = response.data || response;
+      const categoriesData: Category[] = Array.isArray(data) ? data : (data.categories || []);
       setCategories(categoriesData);
     } catch (error: any) {
       console.error('Failed to load categories:', error);
