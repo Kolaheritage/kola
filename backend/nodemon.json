@@ -1,10 +1,9 @@
 {
   "watch": ["src"],
-  "ext": "js,json",
-  "ignore": ["src/**/*.test.js", "node_modules"],
-  "exec": "node src/server.js",
+  "ext": "ts,json",
+  "ignore": ["src/**/*.spec.ts", "src/**/*.test.ts"],
+  "exec": "node --loader ts-node/esm --no-warnings=ExperimentalWarning src/server.ts",
   "env": {
     "NODE_ENV": "development"
-  },
-  "delay": "1000"
+  }
 }
