@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { body } = require('express-validator');
+import { body } from 'express-validator';
 
 /**
  * Validation rules for various endpoints
