@@ -505,6 +505,40 @@ class Content {
     const result = await db.query(query, [status]);
     return result.rows;
   }
+
+  /**
+   * Get user statistics for dashboard
+   * HER-50: User Dashboard Page
+   * @param {string} userId - User UUID
+   * @returns {Promise<Object>} - User statistics
+   */
+  static async getUserStats(userId: string): Promise<{
+    total_content: number;
+    published_count: number;
+    draft_count: number;
+    total_views: number;
+    total_likes: number;
+  }> {
+    const query = `
+      SELECT
+        COUNT(*) as total_content,
+        COUNT(*) FILTER (WHERE status = 'published') as published_count,
+        COUNT(*) FILTER (WHERE status = 'draft') as draft_count,
+        COALESCE(SUM(view_count), 0) as total_views,
+        COALESCE(SUM(likes), 0) as total_likes
+      FROM content
+      WHERE user_id = $1
+    `;
+    const result = await db.query(query, [userId]);
+
+    return {
+      total_content: parseInt(result.rows[0]?.total_content || '0'),
+      published_count: parseInt(result.rows[0]?.published_count || '0'),
+      draft_count: parseInt(result.rows[0]?.draft_count || '0'),
+      total_views: parseInt(result.rows[0]?.total_views || '0'),
+      total_likes: parseInt(result.rows[0]?.total_likes || '0'),
+    };
+  }
 }
 
 export default Content;
