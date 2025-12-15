@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { validationResult } from 'express-validator';
+import { validationResult } from 'express-validator/lib/index.js';
 
 /**
  * Validation middleware
