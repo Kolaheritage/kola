@@ -24,6 +24,14 @@
     "declaration": true,
     "declarationMap": true
   },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true,
+    "compilerOptions": {
+      "module": "ESNext"
+    }
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "coverage", "**/*.test.ts", "**/*.spec.ts"]
 }

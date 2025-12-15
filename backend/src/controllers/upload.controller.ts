@@ -1,8 +1,14 @@
 import { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import asyncHandler from '../utils/asyncHandler';
 import { generateThumbnail, deleteFile, deleteThumbnail } from '../utils/thumbnail';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Upload Controller

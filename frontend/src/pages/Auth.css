@@ -147,6 +147,53 @@
   margin-bottom: 0;
 }
 
+/* Enhanced Sign Up Button */
+.auth-form .btn-primary {
+  background: linear-gradient(135deg, #14B8A6 0%, #0d9488 100%);
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  font-size: 1.0625rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-form .btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.auth-form .btn-primary:hover {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.4);
+}
+
+.auth-form .btn-primary:hover::before {
+  opacity: 1;
+}
+
+.auth-form .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3);
+}
+
+.auth-form .btn-primary:disabled {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
 @media (max-width: 768px) {
   .auth-card {
     padding: 2rem;

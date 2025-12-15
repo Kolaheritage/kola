@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { authenticate, authenticateWithUser } from '../middleware/auth';
 import asyncHandler from '../utils/asyncHandler';
 import User from '../models/User.model';
+import Content from '../models/Content.model';
 import * as profileController from '../controllers/profile.controller';
 import validate from '../middleware/validate';
 import { profileUpdateValidation } from '../utils/validators';
@@ -56,19 +57,20 @@ router.put(
 
 /**
  * @route   GET /api/users/:username
- * @desc    Get user by username (public route)
+ * @desc    Get public user profile with content and stats
  * @access  Public
+ * HER-53: Public User Profile Page
  */
 router.get(
   '/:username',
   asyncHandler(async (req: Request, res: Response) => {
     const { username } = req.params;
 
-    // Find user by username (we'll need to add this method to User model)
-    const query =
-      'SELECT id, email, username, bio, avatar_url, created_at FROM users WHERE username = $1';
-    const result = await db.query(query, [username]);
-    const user = result.rows[0];
+    // Find user by username - exclude sensitive information
+    const userQuery =
+      'SELECT id, username, bio, avatar_url, created_at FROM users WHERE username = $1';
+    const userResult = await db.query(userQuery, [username]);
+    const user = userResult.rows[0];
 
     if (!user) {
       return res.status(404).json({
@@ -80,10 +82,33 @@ router.get(
       });
     }
 
+    // Get user's published content
+    const content = await Content.findAll({
+      user_id: user.id,
+      status: 'published',
+      limit: 100,
+    });
+
+    // Get user's statistics
+    const statsQuery = `
+      SELECT
+        COUNT(*) as total_content,
+        COALESCE(SUM(view_count), 0) as total_views
+      FROM content
+      WHERE user_id = $1 AND status = 'published' AND deleted_at IS NULL
+    `;
+    const statsResult = await db.query(statsQuery, [user.id]);
+    const stats = {
+      total_content: parseInt(statsResult.rows[0].total_content, 10),
+      total_views: parseInt(statsResult.rows[0].total_views, 10),
+    };
+
     res.json({
       success: true,
       data: {
         user,
+        content,
+        stats,
       },
     });
   })

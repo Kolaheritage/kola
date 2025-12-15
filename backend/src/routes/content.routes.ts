@@ -32,6 +32,13 @@ router.get('/random', contentController.getRandomContent);
 router.get('/category/:categoryId', contentController.getContentByCategory);
 
 /**
+ * @route   GET /api/content/me/stats
+ * @desc    Get current user's content statistics
+ * @access  Private
+ */
+router.get('/me/stats', authenticate, contentController.getMyStats);
+
+/**
  * @route   GET /api/content/me
  * @desc    Get current user's content posts
  * @access  Private
