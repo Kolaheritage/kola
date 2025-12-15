@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import apiService from '../services/api';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import './Dashboard.css';
 
 /**
@@ -59,7 +60,11 @@ const Dashboard: React.FC = () => {
   const [draftContent, setDraftContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Delete confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [contentToDelete, setContentToDelete] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -101,28 +106,40 @@ const Dashboard: React.FC = () => {
     navigate(`/upload?edit=${id}`);
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
-      return;
-    }
+  const handleDelete = (id: string, title: string) => {
+    setContentToDelete({ id, title });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!contentToDelete) return;
 
     try {
-      setDeleteLoading(id);
-      await apiService.deleteContent(id);
+      setDeleteLoading(true);
+      await apiService.deleteContent(contentToDelete.id);
 
       // Remove from local state
-      setPublishedContent((prev) => prev.filter((item) => item.id !== id));
-      setDraftContent((prev) => prev.filter((item) => item.id !== id));
+      setPublishedContent((prev) => prev.filter((item) => item.id !== contentToDelete.id));
+      setDraftContent((prev) => prev.filter((item) => item.id !== contentToDelete.id));
 
       // Refresh stats
       const statsResponse = await apiService.getUserStats();
       setStats(statsResponse.data);
+
+      // Close modal
+      setShowDeleteModal(false);
+      setContentToDelete(null);
     } catch (err: any) {
       console.error('Failed to delete content:', err);
       alert(err.message || 'Failed to delete content');
     } finally {
-      setDeleteLoading(null);
+      setDeleteLoading(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setContentToDelete(null);
   };
 
   const handleUploadNew = () => {
@@ -174,10 +191,10 @@ const Dashboard: React.FC = () => {
           <button
             className="btn-danger btn-small"
             onClick={() => handleDelete(content.id, content.title)}
-            disabled={deleteLoading === content.id}
+            disabled={deleteLoading}
             title="Delete"
           >
-            {deleteLoading === content.id ? 'Deleting...' : 'Delete'}
+            Delete
           </button>
         </div>
       </div>
@@ -309,6 +326,17 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Content"
+        message="Are you sure you want to delete this content?"
+        itemName={contentToDelete?.title}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        isDeleting={deleteLoading}
+      />
     </div>
   );
 };

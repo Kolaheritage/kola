@@ -22,6 +22,7 @@ export interface ContentData {
   likes?: number;
   created_at?: Date;
   updated_at?: Date;
+  deleted_at?: Date | null;
 }
 
 export interface ContentWithDetails extends ContentData {
@@ -122,6 +123,7 @@ class Content {
         LEFT JOIN users u ON c.user_id = u.id
         LEFT JOIN categories cat ON c.category_id = cat.id
         WHERE c.status = $2
+          AND c.deleted_at IS NULL
           AND (
             to_tsvector('english', COALESCE(c.title, '')) ||
             to_tsvector('english', COALESCE(c.description, '')) ||
@@ -172,7 +174,7 @@ class Content {
       FROM content c
       LEFT JOIN users u ON c.user_id = u.id
       LEFT JOIN categories cat ON c.category_id = cat.id
-      WHERE 1=1
+      WHERE c.deleted_at IS NULL
     `;
     const params: any[] = [];
     let paramCount = 1;
@@ -226,7 +228,7 @@ class Content {
       FROM content c
       LEFT JOIN users u ON c.user_id = u.id
       LEFT JOIN categories cat ON c.category_id = cat.id
-      WHERE c.id = $1
+      WHERE c.id = $1 AND c.deleted_at IS NULL
     `;
     const result = await db.query(query, [id]);
     return result.rows[0];
@@ -334,8 +336,20 @@ class Content {
    * @param {string} id - Content UUID
    * @returns {Promise<Object>} - Deleted content post
    */
+  /**
+   * Soft delete content post
+   * HER-52: Delete Content
+   * Marks content as deleted instead of removing from database
+   * @param {string} id - Content UUID
+   * @returns {Promise<ContentData | undefined>} - Deleted content data
+   */
   static async delete(id: string): Promise<ContentData | undefined> {
-    const query = 'DELETE FROM content WHERE id = $1 RETURNING *';
+    const query = `
+      UPDATE content
+      SET deleted_at = NOW()
+      WHERE id = $1 AND deleted_at IS NULL
+      RETURNING *
+    `;
     const result = await db.query(query, [id]);
     return result.rows[0];
   }
@@ -348,7 +362,7 @@ class Content {
   static async count(filters: ContentFilters = {}): Promise<number> {
     const { category_id, user_id, status } = filters;
 
-    let query = 'SELECT COUNT(*) as count FROM content WHERE 1=1';
+    let query = 'SELECT COUNT(*) as count FROM content WHERE deleted_at IS NULL';
     const params: any[] = [];
     let paramCount = 1;
 
@@ -388,7 +402,7 @@ class Content {
       FROM content c
       LEFT JOIN users u ON c.user_id = u.id
       LEFT JOIN categories cat ON c.category_id = cat.id
-      WHERE c.tags && $1
+      WHERE c.tags && $1 AND c.deleted_at IS NULL
       ORDER BY c.created_at DESC
     `;
     const result = await db.query(query, [tags]);
@@ -465,7 +479,7 @@ class Content {
       FROM content c
       LEFT JOIN users u ON c.user_id = u.id
       LEFT JOIN categories cat ON c.category_id = cat.id
-      WHERE c.category_id = $1 AND c.status = $2
+      WHERE c.category_id = $1 AND c.status = $2 AND c.deleted_at IS NULL
       ORDER BY RANDOM()
       LIMIT 1
     `;
@@ -494,7 +508,7 @@ class Content {
       LEFT JOIN LATERAL (
         SELECT *
         FROM content
-        WHERE category_id = cat.id AND status = $1
+        WHERE category_id = cat.id AND status = $1 AND deleted_at IS NULL
         ORDER BY RANDOM()
         LIMIT 1
       ) c ON true
@@ -527,7 +541,7 @@ class Content {
         COALESCE(SUM(view_count), 0) as total_views,
         COALESCE(SUM(likes), 0) as total_likes
       FROM content
-      WHERE user_id = $1
+      WHERE user_id = $1 AND deleted_at IS NULL
     `;
     const result = await db.query(query, [userId]);
 
