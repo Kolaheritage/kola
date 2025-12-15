@@ -27,8 +27,6 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   onCancel,
   isDeleting = false,
 }) => {
-  if (!isOpen) return null;
-
   // Prevent background scroll when modal is open
   React.useEffect(() => {
     if (isOpen) {
@@ -58,6 +56,8 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
       document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, isDeleting, onCancel]);
+
+  if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isDeleting) {

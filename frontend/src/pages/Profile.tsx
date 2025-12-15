@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import './Profile.css';
@@ -51,17 +51,7 @@ const Profile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
-  useEffect(() => {
-    if (!username) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
-
-    loadUserProfile();
-  }, [username]);
-
-  const loadUserProfile = async (): Promise<void> => {
+  const loadUserProfile = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
@@ -84,7 +74,17 @@ const Profile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [username]);
+
+  useEffect(() => {
+    if (!username) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
+
+    loadUserProfile();
+  }, [username, loadUserProfile]);
 
   const handleContentClick = (contentId: string) => {
     navigate(`/content/${contentId}`);
