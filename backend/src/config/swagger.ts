@@ -8,7 +8,8 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: 'Heritage Platform API',
       version: '1.0.0',
-      description: 'API documentation for the Heritage Content Platform - A platform for managing and sharing cultural heritage content',
+      description:
+        'API documentation for the Heritage Content Platform - A platform for managing and sharing cultural heritage content',
       contact: {
         name: 'API Support',
       },
@@ -154,11 +155,15 @@ const swaggerSpec = swaggerJsdoc(options);
 
 export const setupSwagger = (app: Application): void => {
   // Swagger UI
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-    explorer: true,
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Heritage Platform API Docs',
-  }));
+  app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      explorer: true,
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'Heritage Platform API Docs',
+    })
+  );
 
   // JSON spec endpoint
   app.get('/api-docs.json', (req, res) => {
