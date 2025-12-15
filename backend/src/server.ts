@@ -11,6 +11,7 @@ import db from './config/database';
 import errorHandler from './middleware/errorHandler';
 import notFoundHandler from './middleware/notFoundHandler';
 import routes from './routes';
+import { setupSwagger } from './config/swagger';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +27,9 @@ app.use(morgan('dev'));
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Setup Swagger documentation
+setupSwagger(app);
 
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
@@ -59,6 +63,7 @@ const startServer = async (): Promise<void> => {
       console.log(`Environment: ${config.env}`);
       console.log(`Health check: http://localhost:${PORT}/health`);
       console.log(`API Base URL: http://localhost:${PORT}/api`);
+      console.log(`API Documentation: http://localhost:${PORT}/api-docs`);
     });
   } catch (error) {
     console.error('Failed to start server:', (error as Error).message);

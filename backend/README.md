@@ -34,6 +34,20 @@ backend/
 └── package.json
 ```
 
+## API Documentation
+
+Interactive API documentation is available via Swagger UI:
+
+**URL**: `http://localhost:5000/api-docs`
+
+The Swagger UI provides:
+- Complete API endpoint documentation
+- Interactive testing interface
+- Request/response schemas
+- Authentication support (JWT Bearer tokens)
+
+You can also access the OpenAPI JSON specification at: `http://localhost:5000/api-docs.json`
+
 ## API Endpoints
 
 ### Authentication
