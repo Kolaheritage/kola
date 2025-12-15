@@ -12,13 +12,17 @@
 
 ### 1. Dependencies
 **Removed:**
+
 - `jest` - Test framework
 - `@types/jest` - Jest TypeScript types
 
 **Added:**
-- `vitest@^3.2.4` - Modern, fast test framework
-- `@vitest/ui@^3.2.4` - Interactive test UI
+
+- `vitest@^2.1.8` - Modern, fast test framework (Node 18+ compatible)
+- `@vitest/ui@^2.1.8` - Interactive test UI
 - `c8@^10.1.3` - Code coverage tool
+
+**Note:** Vitest 2.x is used instead of 3.x for Node 18 compatibility (Vitest 3.x requires Node 20+)
 
 ### 2. Configuration Files
 

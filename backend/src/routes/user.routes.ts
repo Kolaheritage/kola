@@ -17,9 +17,29 @@ const router: Router = Router();
  */
 
 /**
- * @route   GET /api/users/profile
- * @desc    Get current user's profile
- * @access  Private
+ * @swagger
+ * /api/users/profile:
+ *   get:
+ *     summary: Get current user profile
+ *     description: Get the authenticated user's profile information
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
  */
 router.get('/profile', authenticate, profileController.getProfile);
 
@@ -43,9 +63,48 @@ router.get(
 );
 
 /**
- * @route   PUT /api/users/profile
- * @desc    Update current user's profile
- * @access  Private
+ * @swagger
+ * /api/users/profile:
+ *   put:
+ *     summary: Update user profile
+ *     description: Update the authenticated user's profile information
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: johndoe
+ *               bio:
+ *                 type: string
+ *                 example: Cultural heritage enthusiast
+ *               avatar_url:
+ *                 type: string
+ *                 example: /uploads/avatars/user123.jpg
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Invalid input
  */
 router.put(
   '/profile',
@@ -56,10 +115,47 @@ router.put(
 );
 
 /**
- * @route   GET /api/users/:username
- * @desc    Get public user profile with content and stats
- * @access  Public
- * HER-53: Public User Profile Page
+ * @swagger
+ * /api/users/{username}:
+ *   get:
+ *     summary: Get public user profile
+ *     description: Get a user's public profile with their content and stats
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Username of the user
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *                     content:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Content'
+ *                     stats:
+ *                       type: object
+ *                       properties:
+ *                         total_content:
+ *                           type: integer
+ *                         total_views:
+ *                           type: integer
+ *       404:
+ *         description: User not found
  */
 router.get(
   '/:username',

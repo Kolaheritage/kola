@@ -7,12 +7,36 @@ import categoryRoutes from './category.routes';
 
 const router: Router = Router();
 
-// API info endpoint
+/**
+ * @swagger
+ * /api:
+ *   get:
+ *     summary: API information
+ *     description: Get API version and available endpoints
+ *     tags: [API Info]
+ *     responses:
+ *       200:
+ *         description: API information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 version:
+ *                   type: string
+ *                 endpoints:
+ *                   type: object
+ */
 router.get('/', (req: Request, res: Response) => {
   res.json({
     success: true,
     message: 'Heritage Platform API',
     version: '1.0.0',
+    documentation: '/api-docs',
     endpoints: {
       health: '/health',
       api: '/api',
