@@ -1,6 +1,6 @@
 # HER-82: Frontend Deployment Checklist
 
-Use this checklist to ensure complete and successful frontend deployment to Vercel.
+Use this checklist to ensure complete and successful frontend deployment to Netlify.
 
 ---
 
@@ -22,24 +22,24 @@ Use this checklist to ensure complete and successful frontend deployment to Verc
 
 ### Accounts & Access
 - [ ] GitHub account with repository access
-- [ ] Vercel account created
-- [ ] GitHub connected to Vercel
+- [ ] Netlify account created
+- [ ] GitHub connected to Netlify
 
 ---
 
 ## Deployment Steps
 
-### 1. Vercel Project Setup
-- [ ] New Project created in Vercel
+### 1. Netlify Project Setup
+- [ ] New site created in Netlify
 - [ ] Repository connected: `Kolaheritage/kola`
-- [ ] Framework detected: Create React App
-- [ ] Root directory set to: `frontend` ⚠️ CRITICAL!
+- [ ] Build settings auto-detected from `netlify.toml`
+- [ ] Base directory: `/` (project root)
+- [ ] Publish directory: `frontend/build`
 
 ### 2. Build Configuration
-- [ ] Build command: `npm run build` (auto-detected)
-- [ ] Output directory: `build` (auto-detected)
-- [ ] Install command: `npm install` (auto-detected)
-- [ ] Node version: 18.x
+- [ ] Build command: `cd frontend && npm install && npm run build`
+- [ ] Output directory: `frontend/build`
+- [ ] Node version: 18 (from netlify.toml)
 
 ### 3. Environment Variables
 
@@ -78,7 +78,7 @@ Use this checklist to ensure complete and successful frontend deployment to Verc
 
 **Frontend Accessibility**:
 ```bash
-curl https://your-frontend.vercel.app
+curl https://your-frontend.netlify.app
 ```
 - [ ] Returns 200 status code
 - [ ] HTML contains `<div id="root">`
@@ -86,14 +86,14 @@ curl https://your-frontend.vercel.app
 
 **Static Assets**:
 ```bash
-curl https://your-frontend.vercel.app/favicon.ico
-curl https://your-frontend.vercel.app/manifest.json
+curl https://your-frontend.netlify.app/favicon.ico
+curl https://your-frontend.netlify.app/manifest.json
 ```
 - [ ] Favicon loads (200)
 - [ ] Manifest loads (200)
 
 **SPA Routing**:
-- [ ] Visit: `https://your-frontend.vercel.app/about`
+- [ ] Visit: `https://your-frontend.netlify.app/about`
 - [ ] Should load (not 404)
 - [ ] React app renders correctly
 
@@ -145,7 +145,7 @@ console.log(process.env.REACT_APP_API_URL)
 
 **Run Verification Script**:
 ```bash
-./scripts/verify-frontend.sh https://your-frontend.vercel.app https://heritage-backend.onrender.com
+./scripts/verify-frontend.sh https://your-frontend.netlify.app https://heritage-backend.onrender.com
 ```
 - [ ] All tests pass
 - [ ] Success rate: 100%
@@ -157,19 +157,19 @@ console.log(process.env.REACT_APP_API_URL)
 ### Test Auto-Deploy
 1. Make minor change to frontend (e.g., update README)
 2. Commit and push to main branch
-3. Check Vercel dashboard:
+3. Check Netlify dashboard:
    - [ ] New deployment triggered automatically
    - [ ] Build starts within 1 minute
    - [ ] Build completes successfully
    - [ ] New deployment goes live
 
-### Preview Deployments
+### Deploy Previews
 1. Create a new branch: `test-preview`
 2. Make changes and push
 3. Create Pull Request
 4. Check PR:
-   - [ ] Vercel bot comments with preview URL
-   - [ ] Preview deployment builds successfully
+   - [ ] Netlify bot comments with deploy preview URL
+   - [ ] Deploy preview builds successfully
    - [ ] Preview URL accessible
    - [ ] Changes visible in preview
 
@@ -177,10 +177,10 @@ console.log(process.env.REACT_APP_API_URL)
 
 ## Monitoring Setup (Optional but Recommended)
 
-### Vercel Analytics (Paid feature)
-- [ ] Enabled in Vercel dashboard
-- [ ] Web Vitals tracking active
-- [ ] Real User Monitoring data collecting
+### Netlify Analytics (Paid feature)
+- [ ] Enabled in Netlify dashboard ($9/month)
+- [ ] Page views tracking active
+- [ ] Bandwidth monitoring active
 
 ### Google Analytics (Free)
 - [ ] GA account created
@@ -244,7 +244,7 @@ npm run build
 
 ### HTTPS
 - [ ] Deployment uses HTTPS
-- [ ] Valid SSL certificate (Vercel auto-provisioned)
+- [ ] Valid SSL certificate (Netlify auto-provisioned via Let's Encrypt)
 - [ ] No mixed content warnings
 
 ### Security Headers
@@ -282,11 +282,11 @@ Check in Network tab → Response Headers:
 
 If setting up custom domain:
 - [ ] Domain purchased/available
-- [ ] Domain added in Vercel
-- [ ] DNS records configured
-- [ ] SSL certificate provisioned
+- [ ] Domain added in Netlify
+- [ ] DNS records configured (A record or CNAME)
+- [ ] SSL certificate auto-provisioned (Let's Encrypt)
 - [ ] Domain verified
-- [ ] Set as production domain
+- [ ] HTTPS enabled and forced
 
 ---
 
@@ -297,7 +297,7 @@ Final verification that all acceptance criteria are met:
 | Criteria | Status | Evidence |
 |----------|--------|----------|
 | Frontend deployed and accessible | ☐ | Visit deployment URL, loads correctly |
-| Environment variables configured | ☐ | Check Vercel dashboard & console.log |
+| Environment variables configured | ☐ | Check Netlify dashboard & console.log |
 | Connected to production API | ☐ | Login/register works, API calls succeed |
 | Custom domain (optional) | ☐ | N/A or configured |
 | Auto-deploy on main branch merge | ☐ | Push to main triggers deployment |
@@ -354,16 +354,16 @@ After frontend deployment is complete:
 ## Troubleshooting Reference
 
 If any checks fail, refer to:
-- **Deployment Guide**: `docs/FRONTEND_DEPLOYMENT_VERCEL.md`
+- **Deployment Guide**: `docs/FRONTEND_DEPLOYMENT_NETLIFY.md`
 - **CI/CD Setup**: `docs/CI_CD_SETUP.md`
 - **Quick Start**: `docs/DEPLOYMENT_QUICK_START.md`
 - **Backend Deployment**: `docs/BACKEND_DEPLOYMENT_RENDER.md`
 
 Common issues:
-- **Build fails**: Check package.json scripts, dependencies
+- **Build fails**: Check package.json scripts, dependencies, netlify.toml
 - **Blank page**: Check homepage in package.json, router basename
 - **API calls fail**: Verify REACT_APP_API_URL, check CORS
-- **404 on refresh**: Ensure SPA rewrites configured (vercel.json)
+- **404 on refresh**: Ensure SPA rewrites configured (netlify.toml)
 - **Env vars not working**: Must start with REACT_APP_, redeploy after adding
 
 ---
