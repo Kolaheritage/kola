@@ -7,9 +7,7 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || 'heritage_password',
   database: process.env.DB_NAME || 'heritage_db',
   // SSL configuration for production (required for Supabase and most cloud providers)
-  ssl: process.env.NODE_ENV === 'production'
-    ? { rejectUnauthorized: false }
-    : false,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
