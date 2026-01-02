@@ -186,13 +186,28 @@ Defined in `src/index.css`:
 
 ## Environment Variables
 
+### Development
+
 Create `.env` in frontend directory:
 
-```
-REACT_APP_API_URL=http://localhost:5000/api
+```bash
+REACT_APP_API_URL=http://localhost:5002/api
 ```
 
-Or use the proxy in `package.json` (default for Docker).
+Or use docker-compose which handles this automatically.
+
+### Production
+
+Set in Vercel dashboard (see `.env.production.example`):
+
+```bash
+REACT_APP_API_URL=https://heritage-backend.onrender.com/api
+```
+
+**Important**:
+- Must start with `REACT_APP_` (Create React App requirement)
+- Must include `/api` at the end
+- Set in Vercel: Project Settings → Environment Variables
 
 ## Testing
 
@@ -206,3 +221,45 @@ npm test -- --watch
 # Coverage
 npm test -- --coverage
 ```
+
+---
+
+## Deployment
+
+### Production Deployment (Vercel)
+
+**Quick Deploy**:
+1. Push code to GitHub
+2. Import project in Vercel dashboard
+3. Set root directory: `frontend`
+4. Add environment variable: `REACT_APP_API_URL`
+5. Deploy!
+
+**Detailed Guide**: See `docs/FRONTEND_DEPLOYMENT_VERCEL.md`
+
+**Auto-Deploy**:
+- Enabled by default on `main` branch
+- Push to main → Automatic deployment
+- Every PR gets a preview deployment
+
+**Verify Deployment**:
+```bash
+./scripts/verify-frontend.sh https://your-frontend.vercel.app https://heritage-backend.onrender.com
+```
+
+---
+
+## Documentation
+
+- [Frontend Deployment (Vercel)](../docs/FRONTEND_DEPLOYMENT_VERCEL.md)
+- [Backend Deployment (Render)](../docs/BACKEND_DEPLOYMENT_RENDER.md)
+- [Production Database Setup](../docs/PRODUCTION_DATABASE_SETUP.md)
+- [CI/CD Setup](../docs/CI_CD_SETUP.md)
+- [Deployment Quick Start](../docs/DEPLOYMENT_QUICK_START.md)
+
+---
+
+**Live URLs** (after deployment):
+- Frontend: https://heritage-platform.vercel.app
+- Backend API: https://heritage-backend.onrender.com/api
+- API Docs: https://heritage-backend.onrender.com/api-docs
