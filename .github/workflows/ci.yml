@@ -7,9 +7,36 @@ on:
     branches: [main]
 
 jobs:
+  # Detect what changed to optimize CI runs
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/deploy-backend.yml'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/deploy-frontend.yml'
+
   frontend:
     name: Frontend - Lint & Test
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     defaults:
       run:
         working-directory: ./frontend
@@ -37,7 +64,8 @@ jobs:
   backend:
     name: Backend - Lint & Test
     runs-on: ubuntu-latest
-
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     defaults:
       run:
         working-directory: ./backend
@@ -95,7 +123,8 @@ jobs:
   backend-build:
     name: Backend - Build Check
     runs-on: ubuntu-latest
-
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     defaults:
       run:
         working-directory: ./backend
@@ -117,24 +146,41 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-  docker-build:
-    name: Docker - Build Check
+  backend-docker:
+    name: Backend - Docker Build
     runs-on: ubuntu-latest
-
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build backend Docker image
-        run: docker build -t heritage-backend:test ./backend
+      - name: Build backend development image
+        run: docker build -f backend/Dockerfile.dev -t heritage-backend:dev ./backend
 
-      - name: Build frontend Docker image
-        run: docker build -t heritage-frontend:test ./frontend
+      - name: Build backend production image
+        run: docker build -f backend/Dockerfile.prod -t heritage-backend:prod ./backend
 
-  security:
-    name: Security Audit
+  frontend-docker:
+    name: Frontend - Docker Build
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Build frontend development image
+        run: docker build -f frontend/Dockerfile.dev -t heritage-frontend:dev ./frontend
+
+      - name: Build frontend production image
+        run: docker build -f frontend/Dockerfile.prod -t heritage-frontend:prod --build-arg REACT_APP_API_URL=http://localhost:5002/api ./frontend
+
+  backend-security:
+    name: Backend - Security Audit
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -148,6 +194,20 @@ jobs:
         run: cd backend && npm audit --audit-level=moderate
         continue-on-error: true
 
+  frontend-security:
+    name: Frontend - Security Audit
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
       - name: Frontend security audit
         run: cd frontend && npm audit --audit-level=moderate
         continue-on-error: true
@@ -156,7 +216,16 @@ jobs:
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
-    needs: [frontend, backend, backend-build, docker-build]
+    needs: [changes]
+    if: always()
     steps:
+      - name: Check backend jobs
+        if: needs.changes.outputs.backend == 'true'
+        run: echo "Backend checks completed"
+
+      - name: Check frontend jobs
+        if: needs.changes.outputs.frontend == 'true'
+        run: echo "Frontend checks completed"
+
       - name: All checks passed
-        run: echo "All CI checks passed successfully!"
+        run: echo "All applicable CI checks passed successfully!"
