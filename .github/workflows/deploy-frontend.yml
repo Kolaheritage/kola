@@ -21,6 +21,9 @@ on:
       - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: '18'
 

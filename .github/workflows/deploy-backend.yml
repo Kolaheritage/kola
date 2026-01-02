@@ -21,6 +21,9 @@ on:
       - 'backend/**'
       - '.github/workflows/deploy-backend.yml'
 
+permissions:
+  contents: read
+
 env:
   NODE_VERSION: '18'
 
