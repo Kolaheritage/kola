@@ -39,6 +39,11 @@ backend/uploads/*
 *.sqlite
 *.sqlite3
 
+# Database backups
+backups/
+*.dump
+*.sql.gz
+
 # Testing
 coverage/
 .nyc_output/
