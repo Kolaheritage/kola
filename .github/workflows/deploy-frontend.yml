@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event.inputs.environment || 'staging' }}
-      url: ${{ steps.deploy.outputs.url }}
+      url: ${{ steps.deploy.outputs.deploy-url }}
 
     steps:
       - name: Checkout code
@@ -93,7 +93,7 @@ jobs:
       - name: Health check
         run: |
           echo "Checking frontend deployment..."
-          DEPLOY_URL="${{ steps.deploy.outputs.url }}"
+          DEPLOY_URL="${{ steps.deploy.outputs.deploy-url }}"
           echo "Deployment URL: $DEPLOY_URL"
 
           max_attempts=5
@@ -117,7 +117,7 @@ jobs:
         if: success()
         run: |
           echo "🎉 Frontend deployed successfully to ${{ github.event.inputs.environment || 'staging' }}!"
-          echo "URL: ${{ steps.deploy.outputs.url }}"
+          echo "URL: ${{ steps.deploy.outputs.deploy-url }}"
 
       # Notify on failure
       - name: Deployment failed
