@@ -20,7 +20,7 @@
 
 # Production context (main branch)
 [context.production]
-  command = "cd frontend && npm ci && npm run build"
+  command = "cd frontend && npm ci --include=dev && npm run build"
 
   [context.production.environment]
     NODE_ENV = "production"
@@ -28,7 +28,7 @@
 
 # Deploy preview context (pull requests)
 [context.deploy-preview]
-  command = "cd frontend && npm ci && npm run build"
+  command = "cd frontend && npm ci --include=dev && npm run build"
 
   [context.deploy-preview.environment]
     NODE_ENV = "production"
@@ -36,7 +36,7 @@
 
 # Branch deploy context (non-production branches)
 [context.branch-deploy]
-  command = "cd frontend && npm ci && npm run build"
+  command = "cd frontend && npm ci --include=dev && npm run build"
 
 # Redirect rules for SPA (Single Page Application)
 # All routes should serve index.html for client-side routing
