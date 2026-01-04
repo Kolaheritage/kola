@@ -78,6 +78,14 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
+      # Debug deployment outputs
+      - name: Debug Netlify outputs
+        run: |
+          echo "Deployment outputs:"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
+          echo "Deploy URL: ${{ steps.deploy.outputs.deploy-url }}"
+          echo "All outputs: ${{ toJSON(steps.deploy.outputs) }}"
+
       # Health check
       - name: Wait for deployment
         run: sleep 15
