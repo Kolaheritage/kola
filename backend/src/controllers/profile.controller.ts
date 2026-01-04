@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import User, { UpdateUserData } from '../models/User.model';
-import asyncHandler from '../utils/asyncHandler';
+import User, { UpdateUserData } from '../models/User.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * Profile Controller

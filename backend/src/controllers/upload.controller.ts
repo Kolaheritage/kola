@@ -3,8 +3,8 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import asyncHandler from '../utils/asyncHandler';
-import { generateThumbnail, deleteFile, deleteThumbnail } from '../utils/thumbnail';
+import asyncHandler from '../utils/asyncHandler.js';
+import { generateThumbnail, deleteFile, deleteThumbnail } from '../utils/thumbnail.js';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);

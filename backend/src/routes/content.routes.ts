@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { authenticate, optionalAuthenticate } from '../middleware/auth';
-import * as contentController from '../controllers/content.controller';
-import * as likeController from '../controllers/like.controller';
-import validate from '../middleware/validate';
-import { contentValidation } from '../utils/validators';
+import { authenticate, optionalAuthenticate } from '../middleware/auth.js';
+import * as contentController from '../controllers/content.controller.js';
+import * as likeController from '../controllers/like.controller.js';
+import validate from '../middleware/validate.js';
+import { contentValidation } from '../utils/validators.js';
 
 const router: Router = Router();
 

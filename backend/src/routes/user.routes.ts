@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { authenticate, authenticateWithUser } from '../middleware/auth';
-import asyncHandler from '../utils/asyncHandler';
-import User from '../models/User.model';
-import Content from '../models/Content.model';
-import * as profileController from '../controllers/profile.controller';
-import validate from '../middleware/validate';
-import { profileUpdateValidation } from '../utils/validators';
-import db from '../config/database';
+import { authenticate, authenticateWithUser } from '../middleware/auth.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import User from '../models/User.model.js';
+import Content from '../models/Content.model.js';
+import * as profileController from '../controllers/profile.controller.js';
+import validate from '../middleware/validate.js';
+import { profileUpdateValidation } from '../utils/validators.js';
+import db from '../config/database.js';
 
 const router: Router = Router();
 

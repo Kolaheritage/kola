@@ -6,11 +6,11 @@ import Content, {
   ContentStatus,
   ContentSort,
   SearchFilters,
-} from '../models/Content.model';
-import Category from '../models/Category.model';
-import View from '../models/View.model';
-import asyncHandler from '../utils/asyncHandler';
-import cache from '../utils/cache';
+} from '../models/Content.model.js';
+import Category from '../models/Category.model.js';
+import View from '../models/View.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import cache from '../utils/cache.js';
 
 /**
  * Content Controller

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import Category from '../models/Category.model';
-import asyncHandler from '../utils/asyncHandler';
+import Category from '../models/Category.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * Category Controller

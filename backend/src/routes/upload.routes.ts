@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { authenticate } from '../middleware/auth';
-import { upload, validateFileSize, handleMulterError } from '../config/multer';
-import * as uploadController from '../controllers/upload.controller';
+import { authenticate } from '../middleware/auth.js';
+import { upload, validateFileSize, handleMulterError } from '../config/multer.js';
+import * as uploadController from '../controllers/upload.controller.js';
 
 const router: Router = Router();
 

@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { verifyToken } from '../utils/jwt';
-import User from '../models/User.model';
+import { verifyToken } from '../utils/jwt.js';
+import User from '../models/User.model.js';
 
 /**
  * Authentication Middleware

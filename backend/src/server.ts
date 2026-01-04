@@ -6,12 +6,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
-import config from './config/app';
-import db from './config/database';
-import errorHandler from './middleware/errorHandler';
-import notFoundHandler from './middleware/notFoundHandler';
-import routes from './routes';
-import { setupSwagger } from './config/swagger';
+import config from './config/app.js';
+import db from './config/database.js';
+import errorHandler from './middleware/errorHandler.js';
+import notFoundHandler from './middleware/notFoundHandler.js';
+import routes from './routes/index.js';
+import { setupSwagger } from './config/swagger.js';
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
