@@ -31,15 +31,37 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Setup Swagger documentation
 setupSwagger(app);
 
-// Health check endpoint
-app.get('/health', (req: Request, res: Response) => {
+// Health check endpoint with database connectivity test
+app.get('/health', async (req: Request, res: Response) => {
   console.log('Health check requested');
-  res.json({
-    status: 'ok',
-    message: 'Heritage Platform API is running',
+
+  // Test database connection
+  let dbStatus = 'disconnected';
+  let dbMessage = '';
+
+  try {
+    await db.testConnection();
+    dbStatus = 'connected';
+    dbMessage = 'Database connection healthy';
+  } catch (error) {
+    dbMessage = `Database connection failed: ${(error as Error).message}`;
+    console.error('Health check - database error:', error);
+  }
+
+  const healthStatus = {
+    status: dbStatus === 'connected' ? 'healthy' : 'unhealthy',
+    message: 'Heritage Platform API',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-  });
+    database: {
+      status: dbStatus,
+      message: dbMessage,
+    },
+  };
+
+  // Return 503 if database is not connected
+  const statusCode = dbStatus === 'connected' ? 200 : 503;
+  res.status(statusCode).json(healthStatus);
 });
 
 // API Routes

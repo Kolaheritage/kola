@@ -21,6 +21,8 @@ const pool = new Pool({
   user: process.env.DB_USER || 'heritage_user',
   password: process.env.DB_PASSWORD || 'heritage_password',
   database: process.env.DB_NAME || 'heritage_db',
+  // SSL configuration for production (required for Supabase and most cloud providers)
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 /**
