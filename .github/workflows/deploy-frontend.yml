@@ -85,7 +85,7 @@ jobs:
       - name: Health check
         run: |
           echo "Checking frontend deployment..."
-          DEPLOY_URL="${{ steps.deploy.outputs.deploy-url }}"
+          DEPLOY_URL="${{ steps.deploy.outputs.url }}"
           echo "Deployment URL: $DEPLOY_URL"
 
           max_attempts=5
@@ -109,7 +109,7 @@ jobs:
         if: success()
         run: |
           echo "🎉 Frontend deployed successfully to ${{ github.event.inputs.environment || 'staging' }}!"
-          echo "URL: ${{ steps.deploy.outputs.deploy-url }}"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
 
       # Notify on failure
       - name: Deployment failed
