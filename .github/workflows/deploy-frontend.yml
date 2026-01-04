@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event.inputs.environment || 'staging' }}
-      url: ${{ steps.deploy.outputs.url }}
+      url: ${{ steps.deploy.outputs.deploy-url }}
 
     steps:
       - name: Checkout code
@@ -77,6 +77,14 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      # Debug deployment outputs
+      - name: Debug Netlify outputs
+        run: |
+          echo "Deployment outputs:"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
+          echo "Deploy URL: ${{ steps.deploy.outputs.deploy-url }}"
+          echo "All outputs: ${{ toJSON(steps.deploy.outputs) }}"
 
       # Health check
       - name: Wait for deployment
