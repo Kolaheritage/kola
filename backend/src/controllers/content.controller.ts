@@ -6,11 +6,11 @@ import Content, {
   ContentStatus,
   ContentSort,
   SearchFilters,
-} from '../models/Content.model';
-import Category from '../models/Category.model';
-import View from '../models/View.model';
-import asyncHandler from '../utils/asyncHandler';
-import cache from '../utils/cache';
+} from '../models/Content.model.js';
+import Category from '../models/Category.model.js';
+import View from '../models/View.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
+import cache from '../utils/cache.js';
 
 /**
  * Content Controller
@@ -430,6 +430,24 @@ const getMyContent = asyncHandler(
 );
 
 /**
+ * Get current user's content statistics
+ * GET /api/content/me/stats
+ * @route GET /api/content/me/stats
+ * @access Private
+ * HER-50: User Dashboard Page
+ */
+const getMyStats = asyncHandler(async (req: Request, res: Response) => {
+  const authReq = req as unknown as AuthenticatedRequest;
+
+  const stats = await Content.getUserStats(authReq.user.id);
+
+  res.json({
+    success: true,
+    data: stats,
+  });
+});
+
+/**
  * Get content by category
  * GET /api/content/category/:categoryId
  * @route GET /api/content/category/:categoryId
@@ -652,6 +670,7 @@ export {
   updateContent,
   deleteContent,
   getMyContent,
+  getMyStats,
   getContentByCategory,
   getRandomContent,
   searchContent,

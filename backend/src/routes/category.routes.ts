@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as categoryController from '../controllers/category.controller';
+import * as categoryController from '../controllers/category.controller.js';
 
 const router: Router = Router();
 
@@ -9,23 +9,90 @@ const router: Router = Router();
  */
 
 /**
- * @route   GET /api/categories
- * @desc    Get all categories
- * @access  Public
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Get all categories
+ *     description: Retrieve a list of all content categories
+ *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: List of categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
  */
 router.get('/', categoryController.getAllCategories);
 
 /**
- * @route   GET /api/categories/slug/:slug
- * @desc    Get category by slug
- * @access  Public
+ * @swagger
+ * /api/categories/slug/{slug}:
+ *   get:
+ *     summary: Get category by slug
+ *     description: Retrieve a category by its slug identifier
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category slug
+ *         example: cultural-practices
+ *     responses:
+ *       200:
+ *         description: Category found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
+ *       404:
+ *         description: Category not found
  */
 router.get('/slug/:slug', categoryController.getCategoryBySlug);
 
 /**
- * @route   GET /api/categories/:id
- * @desc    Get single category by ID
- * @access  Public
+ * @swagger
+ * /api/categories/{id}:
+ *   get:
+ *     summary: Get category by ID
+ *     description: Retrieve a single category by its ID
+ *     tags: [Categories]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Category ID
+ *     responses:
+ *       200:
+ *         description: Category found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
+ *       404:
+ *         description: Category not found
  */
 router.get('/:id', categoryController.getCategoryById);
 

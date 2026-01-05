@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 
 /**
@@ -6,8 +6,34 @@ import request from 'supertest';
  * HER-22: Create Content Endpoint
  */
 
+// Mock the database module to prevent actual connections
+vi.mock('../src/config/database', () => ({
+  default: {
+    query: vi.fn(),
+    testConnection: vi.fn().mockResolvedValue(true),
+    pool: {
+      on: vi.fn(),
+    },
+  },
+  query: vi.fn(),
+  testConnection: vi.fn().mockResolvedValue(true),
+  pool: {
+    on: vi.fn(),
+  },
+}));
+
+// Mock the Content model
+vi.mock('../src/models/Content.model', () => ({
+  default: {
+    findAll: vi.fn(),
+    findById: vi.fn(),
+    count: vi.fn(),
+  },
+}));
+
 // Import after mocks are defined
 const app = await import('../src/server');
+const Content = await import('../src/models/Content.model');
 
 describe('POST /api/content', () => {
   let authToken: string | undefined;
@@ -22,7 +48,7 @@ describe('POST /api/content', () => {
     media_url: '/uploads/videos/dance-123456789.mp4',
     thumbnail_url: '/uploads/thumbnails/thumb-dance-123456789.jpg',
     tags: ['dance', 'traditional', 'cultural'],
-    status: 'published'
+    status: 'published',
   };
 
   // Setup: Get auth token and category ID before running tests
@@ -197,7 +223,7 @@ describe('POST /api/content', () => {
 
       const minimalData = {
         title: 'Minimal Content',
-        category_id: testCategoryId
+        category_id: testCategoryId,
       };
 
       const response = await request(app.default)
@@ -233,7 +259,7 @@ describe('POST /api/content', () => {
 
       const invalidData = {
         ...validContentData,
-        category_id: '00000000-0000-0000-0000-000000000000' // Non-existent UUID
+        category_id: '00000000-0000-0000-0000-000000000000', // Non-existent UUID
       };
 
       const response = await request(app.default)
@@ -274,7 +300,7 @@ describe('POST /api/content', () => {
         updated_at: expect.any(String),
         username: expect.any(String),
         category_name: expect.any(String),
-        category_slug: expect.any(String)
+        category_slug: expect.any(String),
       });
     });
   });
@@ -282,9 +308,23 @@ describe('POST /api/content', () => {
 
 describe('GET /api/content', () => {
   it('should get all published content', async () => {
-    const response = await request(app.default)
-      .get('/api/content')
-      .expect(200);
+    // Mock Content.findAll to return test data
+    const mockContent = [
+      {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: 'Test Content',
+        description: 'Test Description',
+        category_id: '456e7890-e89b-12d3-a456-426614174000',
+        user_id: '789e0123-e89b-12d3-a456-426614174000',
+        status: 'published',
+        created_at: new Date(),
+      },
+    ] as any;
+
+    vi.mocked(Content.default.findAll).mockResolvedValue(mockContent);
+    vi.mocked(Content.default.count).mockResolvedValue(1);
+
+    const response = await request(app.default).get('/api/content').expect(200);
 
     expect(response.body.success).toBe(true);
     expect(response.body.data.content).toBeDefined();
@@ -292,9 +332,11 @@ describe('GET /api/content', () => {
   });
 
   it('should support pagination', async () => {
-    const response = await request(app.default)
-      .get('/api/content?limit=5&offset=0')
-      .expect(200);
+    // Mock Content.findAll to return paginated data
+    vi.mocked(Content.default.findAll).mockResolvedValue([] as any);
+    vi.mocked(Content.default.count).mockResolvedValue(10);
+
+    const response = await request(app.default).get('/api/content?limit=5&offset=0').expect(200);
 
     expect(response.body.data.pagination).toBeDefined();
     expect(response.body.data.pagination.total).toBeDefined();
@@ -316,6 +358,9 @@ describe('GET /api/content/:id', () => {
   });
 
   it('should return 404 for non-existent content', async () => {
+    // Mock Content.findById to return undefined (not found)
+    vi.mocked(Content.default.findById).mockResolvedValue(undefined);
+
     const response = await request(app.default)
       .get('/api/content/00000000-0000-0000-0000-000000000000')
       .expect(404);
@@ -330,7 +375,7 @@ describe('PUT /api/content/:id', () => {
     // Test would require auth and seeded content
   });
 
-  it('should not update other user\'s content', async () => {
+  it("should not update other user's content", async () => {
     // Test would require auth and seeded content
   });
 
@@ -344,21 +389,19 @@ describe('DELETE /api/content/:id', () => {
     // Test would require auth and seeded content
   });
 
-  it('should not delete other user\'s content', async () => {
+  it("should not delete other user's content", async () => {
     // Test would require auth and seeded content
   });
 });
 
 describe('GET /api/content/me', () => {
   it('should require authentication', async () => {
-    const response = await request(app.default)
-      .get('/api/content/me')
-      .expect(401);
+    const response = await request(app.default).get('/api/content/me').expect(401);
 
     expect(response.body.success).toBe(false);
   });
 
-  it('should get current user\'s content', async () => {
+  it("should get current user's content", async () => {
     // Test would require auth and seeded content
   });
 });

@@ -1,38 +1,101 @@
-# Heritage Platform - Backend
+# Heritage Platform - Backend API
 
-Node.js REST API for the Heritage Content Platform.
+Node.js/Express backend API for the Heritage Content Platform with PostgreSQL database.
+
+## 🚀 Quick Start
+
+### Development
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp ../.env.example .env
+
+# Run database migrations
+npm run migrate
+
+# Seed database (optional)
+npm run seed
+
+# Start development server
+npm run dev
+```
+
+Server runs on: http://localhost:5002
+
+## 📋 Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start development server with hot-reload |
+| `npm run dev:ts` | Start with tsx (alternative) |
+| `npm start` | Start production server |
+| `npm run build` | Compile TypeScript to JavaScript |
+| `npm test` | Run tests with Vitest |
+| `npm run test:ui` | Run tests with UI |
+| `npm run test:coverage` | Generate test coverage report |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format code with Prettier |
+| `npm run format:check` | Check code formatting |
+| `npm run migrate` | Run database migrations |
+| `npm run seed` | Seed database with test data |
 
 ## Tech Stack
 
 - **Runtime**: Node.js 18+
 - **Framework**: Express.js
-- **Language**: JavaScript/TypeScript
-- **Database**: PostgreSQL 15
+- **Language**: TypeScript
+- **Database**: PostgreSQL 15 (Supabase)
 - **Authentication**: JWT (jsonwebtoken)
 - **Validation**: express-validator
 - **File Upload**: Multer + Sharp
+- **Testing**: Vitest + Supertest
+- **Documentation**: Swagger/OpenAPI
 
 ## Project Structure
 
 ```
 backend/
 ├── src/
-│   ├── config/              # App and database configuration
-│   ├── controllers/         # Request handlers
-│   │   ├── auth.controller.js
-│   │   ├── profile.controller.js
-│   │   ├── content.controller.js
-│   │   ├── category.controller.js
-│   │   └── upload.controller.js
-│   ├── routes/              # API route definitions
-│   ├── models/              # Database models
-│   ├── middleware/          # Auth, validation, error handling
-│   ├── utils/               # Helpers (jwt, validators, response)
-│   └── server.js            # Application entry point
-├── uploads/                 # Local media storage
-├── jest.config.js           # Test configuration
-└── package.json
+│   ├── config/          # Configuration files
+│   │   ├── app.ts       # App configuration
+│   │   ├── database.ts  # Database connection
+│   │   ├── multer.ts    # File upload config
+│   │   └── swagger.ts   # API documentation
+│   ├── controllers/     # Route controllers
+│   ├── middleware/      # Express middleware
+│   ├── routes/          # API routes
+│   ├── types/           # TypeScript type definitions
+│   ├── utils/           # Utility functions
+│   │   ├── migrate.ts   # Migration runner
+│   │   ├── seed.ts      # Database seeder
+│   │   └── ...
+│   └── server.ts        # Application entry point
+├── dist/                # Compiled JavaScript (gitignored)
+├── uploads/             # Uploaded files (gitignored)
+├── .env                 # Environment variables (gitignored)
+├── .env.render.example  # Render deployment template
+├── Dockerfile.dev       # Development Docker image
+├── Dockerfile.prod      # Production Docker image
+├── package.json         # Dependencies and scripts
+└── tsconfig.json        # TypeScript configuration
 ```
+
+## API Documentation
+
+Interactive API documentation is available via Swagger UI:
+
+**URL**: `http://localhost:5000/api-docs`
+
+The Swagger UI provides:
+- Complete API endpoint documentation
+- Interactive testing interface
+- Request/response schemas
+- Authentication support (JWT Bearer tokens)
+
+You can also access the OpenAPI JSON specification at: `http://localhost:5000/api-docs.json`
 
 ## API Endpoints
 

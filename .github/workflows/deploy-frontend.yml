@@ -1,0 +1,125 @@
+name: Deploy Frontend
+
+on:
+  # Manual deployment trigger
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: 'staging'
+
+  # Automatic deployment on main branch (to staging)
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  deploy:
+    name: Deploy Frontend to ${{ github.event.inputs.environment || 'staging' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'staging' }}
+      url: ${{ steps.deploy.outputs.deploy-url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # Build frontend
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm test -- --passWithNoTests
+
+      - name: Build application
+        working-directory: ./frontend
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+        run: npm run build
+
+      # Deploy to Netlify
+      - name: Deploy to Netlify
+        id: deploy
+        uses: nwtgck/actions-netlify@v2
+        with:
+          publish-dir: './frontend/build'
+          production-branch: main
+          production-deploy: ${{ github.event.inputs.environment == 'production' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions - ${{ github.sha }}"
+          enable-pull-request-comment: true
+          enable-commit-comment: false
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      # Debug deployment outputs
+      - name: Debug Netlify outputs
+        run: |
+          echo "Deployment outputs:"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
+          echo "Deploy URL: ${{ steps.deploy.outputs.deploy-url }}"
+          echo "All outputs: ${{ toJSON(steps.deploy.outputs) }}"
+
+      # Health check
+      - name: Wait for deployment
+        run: sleep 15
+
+      - name: Health check
+        run: |
+          echo "Checking frontend deployment..."
+          DEPLOY_URL="${{ steps.deploy.outputs.url }}"
+          echo "Deployment URL: $DEPLOY_URL"
+
+          max_attempts=5
+          attempt=0
+
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f -s "$DEPLOY_URL" > /dev/null; then
+              echo "✅ Frontend is accessible!"
+              exit 0
+            fi
+            echo "Waiting for frontend to be ready... (attempt $((attempt + 1))/$max_attempts)"
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+
+          echo "❌ Frontend health check failed"
+          exit 1
+
+      # Notify on success
+      - name: Deployment success
+        if: success()
+        run: |
+          echo "🎉 Frontend deployed successfully to ${{ github.event.inputs.environment || 'staging' }}!"
+          echo "URL: ${{ steps.deploy.outputs.url }}"
+
+      # Notify on failure
+      - name: Deployment failed
+        if: failure()
+        run: echo "❌ Frontend deployment failed!"

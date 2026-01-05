@@ -224,6 +224,48 @@
 
 .btn-signup {
   display: none;
+  background: linear-gradient(135deg, #14B8A6 0%, #0d9488 100%) !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 0.625rem 1.25rem !important;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-signup::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-signup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.4);
+}
+
+.btn-signup:hover::before {
+  opacity: 1;
+}
+
+.btn-signup:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+}
+
+.btn-signup svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 /* User Menu */

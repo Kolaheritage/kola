@@ -1,0 +1,46 @@
+# Render Blueprint for Heritage Platform Backend
+# This file enables Infrastructure as Code deployment on Render
+# Documentation: https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API Service
+  - type: web
+    name: heritage-backend
+    runtime: node
+    region: oregon # Choose: oregon, frankfurt, singapore
+    plan: free # Options: free, starter, standard, pro
+    branch: main
+    rootDir: backend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_PORT
+        value: 5002
+      - key: DB_HOST
+        sync: false # Manual secret
+      - key: DB_PORT
+        value: 5432
+      - key: DB_USER
+        value: postgres
+      - key: DB_PASSWORD
+        sync: false # Manual secret
+      - key: DB_NAME
+        value: postgres
+      - key: JWT_SECRET
+        generateValue: true # Auto-generate secure secret
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: MAX_FILE_SIZE
+        value: 104857600
+      - key: UPLOAD_PATH
+        value: ./uploads
+    # Auto-deploy on push to main
+    autoDeploy: true
+    # Disk for persistent file storage (optional, upgrade to paid plan)
+    # disk:
+    #   name: uploads
+    #   mountPath: /app/uploads
+    #   sizeGB: 1

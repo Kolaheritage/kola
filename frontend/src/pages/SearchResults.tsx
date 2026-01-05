@@ -90,7 +90,7 @@ const SearchResults: React.FC = () => {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [query, pagination]);
+  }, [query]);
 
   // Fetch on query change
   useEffect(() => {
@@ -145,8 +145,8 @@ const SearchResults: React.FC = () => {
           <form onSubmit={handleSearch} className="search-results-form">
             <div className="search-input-wrapper">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="search-icon">
-                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+                <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
               <input
                 type="text"
@@ -216,8 +216,8 @@ const SearchResults: React.FC = () => {
         <div className="empty-state">
           <div className="empty-icon">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-              <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+              <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
           </div>
           <h3 className="empty-title">Start Searching</h3>
@@ -232,9 +232,9 @@ const SearchResults: React.FC = () => {
         <div className="empty-state">
           <div className="empty-icon">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/>
-              <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M8 8l6 6M14 8l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+              <path d="m21 21-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M8 8l6 6M14 8l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </div>
           <h3 className="empty-title">No results found</h3>

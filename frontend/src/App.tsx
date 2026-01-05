@@ -33,6 +33,7 @@ const App: React.FC = () => {
           <Route path="/category/:categoryId" element={<CategoryPage />} />
           <Route path="/content/:contentId" element={<ContentDetail />} />
           <Route path="/search" element={<SearchResults />} />
+          <Route path="/profile/:username" element={<Profile />} />
 
           {/* Protected Routes */}
           <Route
@@ -48,14 +49,6 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Upload />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile/:username"
-            element={
-              <ProtectedRoute>
-                <Profile />
               </ProtectedRoute>
             }
           />

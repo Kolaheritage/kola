@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { validationResult } = require('express-validator');
+import { validationResult } from 'express-validator/lib/index.js';
 
 /**
  * Validation middleware

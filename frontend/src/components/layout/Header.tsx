@@ -272,7 +272,16 @@ const Header: React.FC = () => {
               <Link to="/login" className="btn btn-secondary">
                 Login
               </Link>
-              <Link to="/register" className="btn btn-text btn-signup">
+              <Link to="/register" className="btn btn-accent btn-signup">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M12.5 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM20 8v6M23 11h-6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
                 Sign Up
               </Link>
             </>

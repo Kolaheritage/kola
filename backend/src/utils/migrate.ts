@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { Pool, PoolClient } from 'pg';
 
 /**
@@ -9,12 +11,18 @@ import { Pool, PoolClient } from 'pg';
  * Runs SQL migration files in order
  */
 
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5433'),
   user: process.env.DB_USER || 'heritage_user',
   password: process.env.DB_PASSWORD || 'heritage_password',
   database: process.env.DB_NAME || 'heritage_db',
+  // SSL configuration for production (required for Supabase and most cloud providers)
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 /**

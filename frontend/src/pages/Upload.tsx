@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import './Upload.css';
 
@@ -29,16 +30,23 @@ interface ValidationErrors {
 }
 
 /**
- * Upload Component - HER-25
- * Multi-step form for uploading cultural content with media files
+ * Upload Component - HER-25 & HER-51
+ * Multi-step form for uploading/editing cultural content with media files
  * Steps: 1) Upload Media, 2) Add Details, 3) Review & Submit
+ * Edit Mode: Skips step 1, pre-populates data, uses PUT instead of POST
  */
 const Upload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  // Step management
-  const [currentStep, setCurrentStep] = useState<number>(1);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  // Edit mode detection
+  const editContentId = searchParams.get('edit');
+  const isEditMode = !!editContentId;
+
+  // Step management (skip step 1 in edit mode)
+  const [currentStep, setCurrentStep] = useState<number>(isEditMode ? 2 : 1);
+  const [completedSteps, setCompletedSteps] = useState<number[]>(isEditMode ? [1] : []);
 
   // File upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,10 +79,20 @@ const Upload: React.FC = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [createdContentId, setCreatedContentId] = useState<string | null>(null);
 
+  // Loading state for edit mode
+  const [isLoadingContent, setIsLoadingContent] = useState<boolean>(isEditMode);
+
   // Load categories on mount
   useEffect(() => {
     loadCategories();
   }, []);
+
+  // Load existing content data in edit mode
+  useEffect(() => {
+    if (isEditMode && editContentId) {
+      loadContentForEdit(editContentId);
+    }
+  }, [isEditMode, editContentId]);
 
   const loadCategories = async (): Promise<void> => {
     try {
@@ -84,6 +102,40 @@ const Upload: React.FC = () => {
       setCategories(categoriesData);
     } catch (error: any) {
       console.error('Failed to load categories:', error);
+    }
+  };
+
+  const loadContentForEdit = async (contentId: string): Promise<void> => {
+    try {
+      setIsLoadingContent(true);
+      const response: any = await apiService.getContent(contentId);
+      const content = response.data?.content || response.content;
+
+      if (!content) {
+        setSubmitError('Content not found');
+        return;
+      }
+
+      // Pre-populate form data
+      setFormData({
+        title: content.title || '',
+        description: content.description || '',
+        category_id: content.category_id || '',
+        tags: content.tags || [],
+      });
+
+      // Set uploaded file data (existing media)
+      setUploadedFileData({
+        url: content.media_url || '',
+        thumbnailUrl: content.thumbnail_url,
+        type: content.media_url?.includes('video') ? 'video' : 'image',
+        size: 0, // Unknown size for existing files
+      });
+    } catch (error: any) {
+      console.error('Failed to load content for edit:', error);
+      setSubmitError(error.message || 'Failed to load content data');
+    } finally {
+      setIsLoadingContent(false);
     }
   };
 
@@ -291,23 +343,43 @@ const Upload: React.FC = () => {
         title: formData.title.trim(),
         description: formData.description.trim(),
         category_id: formData.category_id,
-        media_url: uploadedFileData!.url,
-        thumbnail_url: uploadedFileData!.thumbnailUrl,
         tags: formData.tags,
         status: 'published' as const,
       };
 
-      const response: any = await apiService.createContent(contentData);
+      // In edit mode, don't include media URLs (cannot change media)
+      // In create mode, include media URLs
+      const submitData = isEditMode
+        ? contentData
+        : {
+            ...contentData,
+            media_url: uploadedFileData!.url,
+            thumbnail_url: uploadedFileData!.thumbnailUrl,
+          };
+
+      const response: any = isEditMode
+        ? await apiService.updateContent(editContentId!, submitData)
+        : await apiService.createContent(submitData);
 
       if (response.success && response.data) {
-        setCreatedContentId(response.data.content.id);
+        const contentId = response.data.content.id;
+        setCreatedContentId(contentId);
         setSubmitSuccess(true);
       } else {
-        setSubmitError('Failed to create content. Please try again.');
+        setSubmitError(
+          isEditMode
+            ? 'Failed to update content. Please try again.'
+            : 'Failed to create content. Please try again.'
+        );
       }
     } catch (error: any) {
       console.error('Submit error:', error);
-      setSubmitError(error.message || 'Failed to create content. Please try again.');
+      setSubmitError(
+        error.message ||
+          (isEditMode
+            ? 'Failed to update content. Please try again.'
+            : 'Failed to create content. Please try again.')
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -561,8 +633,14 @@ const Upload: React.FC = () => {
     return (
       <div className="upload-page">
         <div className="message-box success">
-          <h3>✓ Content Published Successfully!</h3>
-          <p>Your cultural content has been shared with the community.</p>
+          <h3>
+            ✓ Content {isEditMode ? 'Updated' : 'Published'} Successfully!
+          </h3>
+          <p>
+            {isEditMode
+              ? 'Your changes have been saved successfully.'
+              : 'Your cultural content has been shared with the community.'}
+          </p>
           {createdContentId && (
             <a href={`/content/${createdContentId}`} className="view-content-btn">
               View Your Content
@@ -570,11 +648,11 @@ const Upload: React.FC = () => {
           )}
           <div style={{ marginTop: '1rem' }}>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => navigate('/dashboard')}
               className="btn btn-secondary"
               style={{ display: 'inline-block', maxWidth: '200px' }}
             >
-              Upload Another
+              {isEditMode ? 'Back to Dashboard' : 'Upload Another'}
             </button>
           </div>
         </div>
@@ -582,23 +660,37 @@ const Upload: React.FC = () => {
     );
   }
 
+  // Loading state for edit mode
+  if (isLoadingContent) {
+    return (
+      <div className="upload-page">
+        <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+          <div className="spinner" style={{ margin: '0 auto 1rem' }}></div>
+          <p>Loading content data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="upload-page">
-      <h1>Upload Cultural Content</h1>
+      <h1>{isEditMode ? 'Edit Content' : 'Upload Cultural Content'}</h1>
 
       {/* Progress Steps */}
       <div className="progress-steps">
-        <div className={`step ${currentStep >= 1 ? 'active' : ''} ${completedSteps.includes(1) ? 'completed' : ''}`}>
-          <div className="step-circle">{completedSteps.includes(1) ? '✓' : '1'}</div>
-          <div className="step-label">Upload Media</div>
-        </div>
+        {!isEditMode && (
+          <div className={`step ${currentStep >= 1 ? 'active' : ''} ${completedSteps.includes(1) ? 'completed' : ''}`}>
+            <div className="step-circle">{completedSteps.includes(1) ? '✓' : '1'}</div>
+            <div className="step-label">Upload Media</div>
+          </div>
+        )}
         <div className={`step ${currentStep >= 2 ? 'active' : ''} ${completedSteps.includes(2) ? 'completed' : ''}`}>
-          <div className="step-circle">{completedSteps.includes(2) ? '✓' : '2'}</div>
-          <div className="step-label">Add Details</div>
+          <div className="step-circle">{completedSteps.includes(2) ? '✓' : isEditMode ? '1' : '2'}</div>
+          <div className="step-label">{isEditMode ? 'Edit Details' : 'Add Details'}</div>
         </div>
         <div className={`step ${currentStep >= 3 ? 'active' : ''}`}>
-          <div className="step-circle">3</div>
-          <div className="step-label">Review & Submit</div>
+          <div className="step-circle">{isEditMode ? '2' : '3'}</div>
+          <div className="step-label">Review & {isEditMode ? 'Update' : 'Submit'}</div>
         </div>
       </div>
 
@@ -649,10 +741,10 @@ const Upload: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <span className="spinner"></span>
-                  Publishing...
+                  {isEditMode ? 'Updating...' : 'Publishing...'}
                 </>
               ) : (
-                'Publish Content'
+                isEditMode ? 'Update Content' : 'Publish Content'
               )}
             </button>
           )}
@@ -661,18 +753,25 @@ const Upload: React.FC = () => {
         {/* Quick edit buttons on review step */}
         {currentStep === 3 && (
           <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-            <button
-              onClick={() => handleEditStep(1)}
-              style={{ margin: '0 0.5rem', padding: '0.5rem 1rem', background: 'transparent', border: '1px solid #cbd5e0', borderRadius: '4px', cursor: 'pointer' }}
-            >
-              Edit Media
-            </button>
+            {!isEditMode && (
+              <button
+                onClick={() => handleEditStep(1)}
+                style={{ margin: '0 0.5rem', padding: '0.5rem 1rem', background: 'transparent', border: '1px solid #cbd5e0', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Edit Media
+              </button>
+            )}
             <button
               onClick={() => handleEditStep(2)}
               style={{ margin: '0 0.5rem', padding: '0.5rem 1rem', background: 'transparent', border: '1px solid #cbd5e0', borderRadius: '4px', cursor: 'pointer' }}
             >
               Edit Details
             </button>
+            {isEditMode && (
+              <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
+                Note: Media files cannot be changed after upload
+              </p>
+            )}
           </div>
         )}
       </div>

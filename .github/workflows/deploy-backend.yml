@@ -1,0 +1,120 @@
+name: Deploy Backend
+
+on:
+  # Manual deployment trigger
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: 'staging'
+
+  # Automatic deployment on main branch (to staging)
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  deploy:
+    name: Deploy Backend to ${{ github.event.inputs.environment || 'staging' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment || 'staging' }}
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      # Run tests before deployment
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./backend
+        run: npm test
+        env:
+          NODE_ENV: test
+
+      - name: Build TypeScript
+        working-directory: ./backend
+        run: npm run build
+
+      # Deploy to Render
+      - name: Deploy to Render
+        id: deploy
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_BACKEND_SERVICE_ID }}
+        run: |
+          echo "Deploying backend to Render..."
+          # Trigger Render deployment via API
+          curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": false}'
+
+          echo "url=https://your-backend.onrender.com" >> $GITHUB_OUTPUT
+
+      # Alternative: Deploy to Railway
+      # - name: Deploy to Railway
+      #   uses: bervProject/railway-deploy@main
+      #   with:
+      #     railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      #     service: backend
+
+      # Health check
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Health check
+        run: |
+          echo "Checking backend health..."
+          max_attempts=10
+          attempt=0
+
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f -s https://your-backend.onrender.com/health > /dev/null; then
+              echo "✅ Backend is healthy!"
+              exit 0
+            fi
+            echo "Waiting for backend to be ready... (attempt $((attempt + 1))/$max_attempts)"
+            sleep 10
+            attempt=$((attempt + 1))
+          done
+
+          echo "❌ Backend health check failed"
+          exit 1
+
+      # Notify on success
+      - name: Deployment success
+        if: success()
+        run: |
+          echo "🎉 Backend deployed successfully to ${{ github.event.inputs.environment || 'staging' }}!"
+          echo "URL: https://your-backend.onrender.com"
+
+      # Notify on failure
+      - name: Deployment failed
+        if: failure()
+        run: echo "❌ Backend deployment failed!"

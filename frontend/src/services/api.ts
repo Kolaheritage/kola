@@ -144,6 +144,8 @@ const apiService = {
   // Content
   createContent: (data: ContentData) => api.post('/content', data),
   getContent: (id: string) => api.get(`/content/${id}`),
+  getMyContent: (params?: ContentParams) => api.get('/content/me', { params }),
+  getUserStats: () => api.get('/content/me/stats'),
   getContentByCategory: (categoryId: string, params?: ContentParams) =>
     api.get(`/content/category/${categoryId}`, { params }),
   getRandomContent: (categoryId?: string) =>

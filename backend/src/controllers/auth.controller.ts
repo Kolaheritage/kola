@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import User, { UserData } from '../models/User.model';
-import { generateToken } from '../utils/jwt';
-import asyncHandler from '../utils/asyncHandler';
+import User, { UserData } from '../models/User.model.js';
+import { generateToken } from '../utils/jwt.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * Authentication Controller

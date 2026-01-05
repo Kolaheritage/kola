@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import Like from '../models/Like.model';
-import Content from '../models/Content.model';
-import asyncHandler from '../utils/asyncHandler';
+import Like from '../models/Like.model.js';
+import Content from '../models/Content.model.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 /**
  * Like Controller

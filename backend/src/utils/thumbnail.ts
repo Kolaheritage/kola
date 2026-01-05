@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
-import { uploadDirs } from '../config/multer';
+import { uploadDirs } from '../config/multer.js';
 
 /**
  * Thumbnail Generation Utility
