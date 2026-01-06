@@ -39,6 +39,8 @@ services:
         value: ./uploads
       - key: CORS_ORIGIN
         value: "*"
+      - key: API_URL
+        value: https://heritage-backend-vwm9.onrender.com
     # Auto-deploy on push to main
     autoDeploy: true
     # Disk for persistent file storage (optional, upgrade to paid plan)

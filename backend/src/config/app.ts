@@ -20,6 +20,7 @@ interface UploadConfig {
 interface AppConfig {
   env: string;
   port: number;
+  apiUrl: string;
   corsOptions: CorsOptions;
   jwt: JwtConfig;
   upload: UploadConfig;
@@ -28,6 +29,7 @@ interface AppConfig {
 const config: AppConfig = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '5000'),
+  apiUrl: process.env.API_URL || 'http://localhost:5000',
 
   // CORS configuration
   corsOptions: {

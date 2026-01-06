@@ -2,6 +2,8 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import { Application } from 'express';
 import swaggerUi from 'swagger-ui-express';
 
+import config from './app.js';
+
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -19,16 +21,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'https://heritage-backend-vwm9.onrender.com',
-        description: 'Production server',
-      },
-      {
-        url: '/api',
-        description: 'Relative path (for same-origin requests)',
-      },
-      {
-        url: 'http://localhost:5000',
-        description: 'Development server',
+        url: config.apiUrl,
+        description: 'API Server',
       },
     ],
     components: {
