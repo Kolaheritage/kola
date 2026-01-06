@@ -16,7 +16,7 @@
   [build.environment]
     NODE_VERSION = "18"
     NPM_VERSION = "9"
-    REACT_APP_API_URL = "https://heritage-backend-vwm9.onrender.com"
+    NPM_VERSION = "9"
 
 # Production context (main branch)
 [context.production]
@@ -25,7 +25,7 @@
   [context.production.environment]
     NODE_ENV = "production"
     REACT_APP_ENV = "production"
-    REACT_APP_API_URL = "https://heritage-backend-vwm9.onrender.com"
+    REACT_APP_ENV = "production"
 
 # Deploy preview context (pull requests)
 [context.deploy-preview]
@@ -34,7 +34,7 @@
   [context.deploy-preview.environment]
     NODE_ENV = "production"
     REACT_APP_ENV = "staging"
-    REACT_APP_API_URL = "https://heritage-backend-vwm9.onrender.com"
+    REACT_APP_ENV = "staging"
 
 # Branch deploy context (non-production branches)
 [context.branch-deploy]

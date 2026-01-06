@@ -24,10 +24,15 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Check arguments
-if [ -z "$1" ]; then
+# Use environment variable if argument is not provided
+BACKEND_URL=${1:-$BACKEND_URL}
+
+# Check if URL is available
+if [ -z "$BACKEND_URL" ]; then
     echo -e "${RED}Error: Backend URL not specified!${NC}"
     echo ""
-    echo "Usage: $0 <backend-url>"
+    echo "Usage: $0 [backend-url]"
+    echo "Or set BACKEND_URL environment variable"
     echo ""
     echo "Examples:"
     echo "  $0 https://heritage-backend.onrender.com"
@@ -35,7 +40,6 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-BACKEND_URL=$1
 # Remove trailing slash if present
 BACKEND_URL=${BACKEND_URL%/}
 

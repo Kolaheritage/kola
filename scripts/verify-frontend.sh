@@ -25,10 +25,16 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Check arguments
-if [ -z "$1" ] || [ -z "$2" ]; then
+# Use environment variables if arguments are not provided
+FRONTEND_URL=${1:-$FRONTEND_URL}
+BACKEND_URL=${2:-$BACKEND_URL}
+
+# Check if URLs are available
+if [ -z "$FRONTEND_URL" ] || [ -z "$BACKEND_URL" ]; then
     echo -e "${RED}Error: URLs not specified!${NC}"
     echo ""
-    echo "Usage: $0 <frontend-url> <backend-url>"
+    echo "Usage: $0 [frontend-url] [backend-url]"
+    echo "Or set FRONTEND_URL and BACKEND_URL environment variables"
     echo ""
     echo "Examples:"
     echo "  $0 https://heritage-platform.vercel.app https://heritage-backend.onrender.com"
@@ -36,8 +42,6 @@ if [ -z "$1" ] || [ -z "$2" ]; then
     exit 1
 fi
 
-FRONTEND_URL=$1
-BACKEND_URL=$2
 # Remove trailing slashes if present
 FRONTEND_URL=${FRONTEND_URL%/}
 BACKEND_URL=${BACKEND_URL%/}
