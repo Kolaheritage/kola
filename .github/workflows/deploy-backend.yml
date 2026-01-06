@@ -75,7 +75,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"clearCache": false}'
 
-          echo "url=https://your-backend.onrender.com" >> $GITHUB_OUTPUT
+          echo "url=https://heritage-backend-vwm9.onrender.com" >> $GITHUB_OUTPUT
 
       # Alternative: Deploy to Railway
       # - name: Deploy to Railway
@@ -95,7 +95,7 @@ jobs:
           attempt=0
 
           while [ $attempt -lt $max_attempts ]; do
-            if curl -f -s https://your-backend.onrender.com/health > /dev/null; then
+            if curl -f -s https://heritage-backend-vwm9.onrender.com/health > /dev/null; then
               echo "✅ Backend is healthy!"
               exit 0
             fi
@@ -107,12 +107,26 @@ jobs:
           echo "❌ Backend health check failed"
           exit 1
 
+      # Run database migrations
+      - name: Run database migrations
+        working-directory: ./backend
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          NODE_ENV: production
+        run: |
+          echo "Running database migrations..."
+          npm run migrate
+
       # Notify on success
       - name: Deployment success
         if: success()
         run: |
           echo "🎉 Backend deployed successfully to ${{ github.event.inputs.environment || 'staging' }}!"
-          echo "URL: https://your-backend.onrender.com"
+          echo "URL: https://heritage-backend-vwm9.onrender.com"
 
       # Notify on failure
       - name: Deployment failed

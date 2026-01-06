@@ -119,12 +119,21 @@ Final job that reports overall CI status.
 5. Build TypeScript
 6. Deploy to Render (or Railway)
 7. Health check validation
-8. Success/failure notification
+8. Run database migrations
+9. Success/failure notification
 
 **Required Secrets**:
 ```
+# Render Deployment
 RENDER_API_KEY              # Render API token
 RENDER_BACKEND_SERVICE_ID   # Render service ID
+
+# Database (for migrations)
+DB_HOST                     # Database host (e.g., db.xxx.supabase.co)
+DB_PORT                     # Database port (usually 5432)
+DB_USER                     # Database user (e.g., postgres)
+DB_PASSWORD                 # Database password
+DB_NAME                     # Database name (e.g., postgres)
 ```
 
 **Health Check**:
