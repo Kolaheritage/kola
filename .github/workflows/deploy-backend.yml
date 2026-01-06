@@ -75,7 +75,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"clearCache": false}'
 
-          echo "url=https://your-backend.onrender.com" >> $GITHUB_OUTPUT
+          echo "url=https://heritage-backend-vwm9.onrender.com" >> $GITHUB_OUTPUT
 
       # Alternative: Deploy to Railway
       # - name: Deploy to Railway
@@ -95,7 +95,7 @@ jobs:
           attempt=0
 
           while [ $attempt -lt $max_attempts ]; do
-            if curl -f -s https://your-backend.onrender.com/health > /dev/null; then
+            if curl -f -s https://heritage-backend-vwm9.onrender.com/health > /dev/null; then
               echo "✅ Backend is healthy!"
               exit 0
             fi
@@ -112,7 +112,7 @@ jobs:
         if: success()
         run: |
           echo "🎉 Backend deployed successfully to ${{ github.event.inputs.environment || 'staging' }}!"
-          echo "URL: https://your-backend.onrender.com"
+          echo "URL: https://heritage-backend-vwm9.onrender.com"
 
       # Notify on failure
       - name: Deployment failed
