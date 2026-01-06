@@ -37,6 +37,8 @@ services:
         value: 104857600
       - key: UPLOAD_PATH
         value: ./uploads
+      - key: CORS_ORIGIN
+        value: "*"
     # Auto-deploy on push to main
     autoDeploy: true
     # Disk for persistent file storage (optional, upgrade to paid plan)

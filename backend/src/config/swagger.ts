@@ -19,12 +19,16 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: 'Development server',
+        url: 'https://heritage-backend-vwm9.onrender.com',
+        description: 'Production server',
       },
       {
-        url: 'http://localhost:5000/api',
-        description: 'Development API base',
+        url: '/api',
+        description: 'Relative path (for same-origin requests)',
+      },
+      {
+        url: 'http://localhost:5000',
+        description: 'Development server',
       },
     ],
     components: {
