@@ -111,7 +111,7 @@ jobs:
       - name: Run database migrations
         working-directory: ./backend
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DB_URL }}
           NODE_ENV: production
         run: |
           echo "Running database migrations..."
