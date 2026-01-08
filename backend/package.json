@@ -9,7 +9,7 @@
     "rollup": ">=4.20.0"
   },
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node dist/utils/migrate.js && node dist/server.js",
     "dev": "nodemon src/server.ts",
     "dev:ts": "node --import tsx/esm src/server.ts",
     "build": "tsc",
