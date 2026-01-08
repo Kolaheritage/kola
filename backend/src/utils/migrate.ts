@@ -110,7 +110,7 @@ async function runMigrations(): Promise<void> {
 }
 
 // Run migrations if this script is executed directly
-if (require.main === module) {
+if (process.argv[1] === __filename) {
   runMigrations();
 }
 
