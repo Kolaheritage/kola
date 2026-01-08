@@ -116,7 +116,7 @@
 #   package = "@netlify/plugin-lighthouse"
 
 # Build plugins for optimization
-[[plugins]]
+# [[plugins]]
 #   package = "@netlify/plugin-sitemap"
 
 # Form handling (if using Netlify Forms)
