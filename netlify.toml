@@ -117,7 +117,7 @@
 
 # Build plugins for optimization
 [[plugins]]
-  package = "@netlify/plugin-sitemap"
+#   package = "@netlify/plugin-sitemap"
 
 # Form handling (if using Netlify Forms)
 # [[plugins]]
