@@ -103,7 +103,9 @@ jobs:
         run: npm install --prefer-offline
 
       - name: Fix optional dependencies
-        run: npm rebuild rollup
+        run: |
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu || true
+          npm rebuild rollup || true
 
       - name: Run ESLint
         run: npm run lint
@@ -150,7 +152,9 @@ jobs:
         run: npm install --prefer-offline
 
       - name: Fix optional dependencies
-        run: npm rebuild rollup
+        run: |
+          npm install --no-save --ignore-scripts @rollup/rollup-linux-x64-gnu || true
+          npm rebuild rollup || true
 
       - name: Build TypeScript
         run: npm run build
