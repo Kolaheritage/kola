@@ -15,15 +15,21 @@ import { Pool, PoolClient } from 'pg';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5433'),
-  user: process.env.DB_USER || 'heritage_user',
-  password: process.env.DB_PASSWORD || 'heritage_password',
-  database: process.env.DB_NAME || 'heritage_db',
-  // SSL configuration for production (required for Supabase and most cloud providers)
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
+// Support both DATABASE_URL and individual connection parameters
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    })
+  : new Pool({
+      host: process.env.DB_HOST || 'localhost',
+      port: Number.parseInt(process.env.DB_PORT || '5433'),
+      user: process.env.DB_USER || 'heritage_user',
+      password: process.env.DB_PASSWORD || 'heritage_password',
+      database: process.env.DB_NAME || 'heritage_db',
+      // SSL configuration for production (required for Supabase and most cloud providers)
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    });
 
 /**
  * Run all migrations in the migrations directory
