@@ -14,8 +14,8 @@
 
   # Environment variables for build
   [build.environment]
-    NODE_VERSION = "18"
-    NPM_VERSION = "9"
+    NODE_VERSION = "20"
+    NPM_VERSION = "10"
     REACT_APP_API_URL = "https://heritage-backend-vwm9.onrender.com/api"
 
 # Production context (main branch)
