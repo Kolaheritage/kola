@@ -5,7 +5,8 @@
   "description": "Backend API for Heritage Content Platform",
   "main": "dist/server.js",
   "overrides": {
-    "esbuild": ">=0.24.3"
+    "esbuild": ">=0.24.3",
+    "rollup": ">=4.20.0"
   },
   "scripts": {
     "start": "node dist/server.js",
