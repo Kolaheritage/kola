@@ -20,17 +20,17 @@ services:
       - key: BACKEND_PORT
         value: 5002
       - key: DATABASE_URL
-        sync: false # Manual secret - Full database connection string
+        sync: false # Manual secret - Full database connection string (preferred)
       - key: DB_HOST
         sync: false # Manual secret (fallback if DATABASE_URL not set)
       - key: DB_PORT
-        value: 5432
+        sync: false # Manual secret (fallback if DATABASE_URL not set)
       - key: DB_USER
-        value: postgres
+        sync: false # Manual secret (fallback if DATABASE_URL not set)
       - key: DB_PASSWORD
         sync: false # Manual secret (fallback if DATABASE_URL not set)
       - key: DB_NAME
-        value: postgres
+        sync: false # Manual secret (fallback if DATABASE_URL not set)
       - key: JWT_SECRET
         generateValue: true # Auto-generate secure secret
       - key: JWT_EXPIRES_IN
