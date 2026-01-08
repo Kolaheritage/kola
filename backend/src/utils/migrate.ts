@@ -23,7 +23,7 @@ const pool = process.env.DATABASE_URL
     })
   : new Pool({
       host: process.env.DB_HOST || 'localhost',
-      port: Number.parseInt(process.env.DB_PORT || '5433'),
+      port: Number.parseInt(process.env.DB_PORT || '5432'),
       user: process.env.DB_USER || 'heritage_user',
       password: process.env.DB_PASSWORD || 'heritage_password',
       database: process.env.DB_NAME || 'heritage_db',
