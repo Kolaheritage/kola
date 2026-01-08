@@ -19,14 +19,16 @@ services:
         value: production
       - key: BACKEND_PORT
         value: 5002
+      - key: DATABASE_URL
+        sync: false # Manual secret - Full database connection string
       - key: DB_HOST
-        sync: false # Manual secret
+        sync: false # Manual secret (fallback if DATABASE_URL not set)
       - key: DB_PORT
         value: 5432
       - key: DB_USER
         value: postgres
       - key: DB_PASSWORD
-        sync: false # Manual secret
+        sync: false # Manual secret (fallback if DATABASE_URL not set)
       - key: DB_NAME
         value: postgres
       - key: JWT_SECRET
